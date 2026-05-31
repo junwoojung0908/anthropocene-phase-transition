@@ -11,7 +11,7 @@
   :root{
     --paper:#f4f0e7; --paper2:#ece5d6; --ink:#1a1916; --ink-soft:#57534a;
     --rule:#c7bfab; --accent:#a8322d; --accent2:#2f5d62; --accent3:#c0892f;
-    --grid:#ded6c4; --maxw:960px; --readw:720px;
+    --grid:#ded6c4; --maxw:880px;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -19,9 +19,7 @@
     font-family:"Newsreader",Georgia,serif;font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased;
     background-image:radial-gradient(circle at 50% -8%,#faf6ec 0%,var(--paper) 52%);}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px;}
-  /* unified column: panels & dividers span the full 960, prose is capped for readability */
-  section>p, section>h1, section>h2, section>.lede, section>.tagline,
-  section>.kicker, section>.byline, section>.caption{max-width:var(--readw);}
+  /* unified column: prose and panels share exactly the same width */
   .panel.wide{max-width:none;}
   .mono{font-family:"Space Mono",monospace;}
   .kicker{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);}
