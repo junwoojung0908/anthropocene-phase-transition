@@ -1,130 +1,149 @@
 #!/usr/bin/env python3
-"""Extract real Our World in Data / Global Carbon Project series into data.json
-for the Anthropocene phase-transition interactive.
+"""Canonical, reproducible data build for the Anthropocene phase-transition page.
 
-Source CSV: https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv
+Emits data.json in the structure the page's JS expects:
+  p1.world   = { "<indicator>": [values...], "_years": [...] }
+  p1.country = { "<country>":   [values...], "_years": [...] }
+  p1.mixed   = { "<label>":     [values...], "_years": [...], "_kinds": {label: "pos"|"signed"} }
+  p2         = { "years": [...], "co2": [...] }
+
+Sources (auto-downloaded if missing):
+  OWID / Global Carbon Project  owid-co2-data.csv
+  NASA GISTEMP global surface temperature anomaly (J-D annual)
+  NOAA Mauna Loa annual mean atmospheric CO2 concentration
 """
-import csv, json, math, sys
+import csv, json, math, os, urllib.request, hashlib
 
-CSV = sys.argv[1] if len(sys.argv) > 1 else "/tmp/owid-co2-data.csv"
-OUT = sys.argv[2] if len(sys.argv) > 2 else "/tmp/data.json"
-
-# Probe I — world indicators with clean, gap-free, strictly-positive annual
-# coverage over the whole window (so log-growth is well defined). In the current
-# OWID file the World entity's methane / nitrous_oxide series only begin in 1970
-# and land_use_change_co2 in 1950, so they are excluded to keep a long baseline.
-WORLD_IND = ["population", "co2", "coal_co2", "oil_co2", "gas_co2", "cement_co2"]
-WORLD_RANGE = (1900, 2022)          # common contiguous range
-COUNTRY_RANGE = (1910, 2022)        # common contiguous range for the country set
-P2_RANGE = (1850, 2022)             # world annual CO2 for the honesty plot
-
-# ---- load ----
-rows = []
-with open(CSV, newline="") as f:
-    r = csv.DictReader(f)
-    cols = r.fieldnames
-    for row in r:
-        rows.append(row)
+TMP = "/tmp"
+OWID = os.path.join(TMP, "owid-co2-data.csv")
+GIST = os.path.join(TMP, "gistemp.csv")
+MLO  = os.path.join(TMP, "mlo.csv")
+URLS = {
+    OWID: "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv",
+    GIST: "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv",
+    MLO:  "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_mlo.csv",
+}
+for p in (OWID, GIST, MLO):
+    if not os.path.exists(p) or os.path.getsize(p) < 1000:
+        urllib.request.urlretrieve(URLS[p], p)
 
 def num(v):
-    if v is None or v == "":
-        return None
     try:
-        x = float(v)
-        return x
-    except ValueError:
+        return float(v)
+    except (TypeError, ValueError):
         return None
 
-# index: country -> year -> row
+rows = list(csv.DictReader(open(OWID, newline="")))
 by_country = {}
 for row in rows:
     by_country.setdefault(row["country"], {})[int(float(row["year"]))] = row
-
-# ---------- Probe I: world ----------
 world = by_country["World"]
-y0, y1 = WORLD_RANGE
-world_years = list(range(y0, y1 + 1))
-world_series = []
-for ind in WORLD_IND:
+
+def wseries(ind, y0, y1):
     s = []
-    for y in world_years:
-        row = world.get(y)
-        v = num(row[ind]) if row else None
+    for y in range(y0, y1 + 1):
+        r = world.get(y)
+        v = num(r[ind]) if r else None
         if v is None or v <= 0:
-            v = None
+            return None
         s.append(v)
-    world_series.append(s)
+    return s
 
-# verify no gaps
-for ind, s in zip(WORLD_IND, world_series):
-    missing = [world_years[i] for i, v in enumerate(s) if v is None]
-    if missing:
-        print(f"  WARN world {ind}: missing {missing[:5]}{'...' if len(missing)>5 else ''}", file=sys.stderr)
+# ---------- Probe I: world (auto-select clean indicators) ----------
+WR = (1900, 2022)
+CAND = ["population", "co2", "coal_co2", "oil_co2", "gas_co2", "cement_co2",
+        "land_use_change_co2", "methane", "nitrous_oxide"]
+world_block = {"_years": list(range(WR[0], WR[1] + 1))}
+w_used = []
+for ind in CAND:
+    s = wseries(ind, *WR)
+    if s is not None:
+        world_block[ind] = s
+        w_used.append(ind)
 
-# ---------- Probe I: countries ----------
-# real sovereign countries only: 3-letter ISO, not OWID_ aggregates
+# ---------- Probe I: countries (clean co2; cap top emitters for readability) ----------
+CR = (1910, 2022)
+CAP = 40
 def is_country(c):
-    rows_c = by_country[c]
-    iso = next(iter(rows_c.values()))["iso_code"]
+    iso = next(iter(by_country[c].values()))["iso_code"]
     return iso and len(iso) == 3 and not iso.startswith("OWID")
-
-cy0, cy1 = COUNTRY_RANGE
-country_years = list(range(cy0, cy1 + 1))
-candidates = []
+cyrs = list(range(CR[0], CR[1] + 1))
+cand = []
 for c in by_country:
     if c == "World" or not is_country(c):
         continue
-    rows_c = by_country[c]
-    s = []
-    ok = True
-    for y in country_years:
-        row = rows_c.get(y)
-        v = num(row["co2"]) if row else None
+    s, ok = [], True
+    for y in cyrs:
+        r = by_country[c].get(y)
+        v = num(r["co2"]) if r else None
         if v is None or v <= 0:
-            ok = False
-            break
+            ok = False; break
         s.append(v)
     if ok:
-        candidates.append((c, s))
+        cand.append((c, s, s[-1]))
+cand.sort(key=lambda t: -t[2])
+cand = cand[:CAP]
+cand.sort(key=lambda t: t[0])
+country_block = {"_years": cyrs}
+for c, s, _ in cand:
+    country_block[c] = s
 
-candidates.sort(key=lambda t: t[0])
-country_names = [c for c, _ in candidates]
-country_series = [s for _, s in candidates]
-print(f"  country set: {len(country_names)} countries fully cover {cy0}-{cy1}", file=sys.stderr)
+# ---------- Probe II: world annual co2 ----------
+PR = (1850, 2022)
+p2_years, p2_co2 = [], []
+for y in range(PR[0], PR[1] + 1):
+    r = world.get(y); v = num(r["co2"]) if r else None
+    p2_years.append(y); p2_co2.append(v if (v and v > 0) else None)
 
-# ---------- Probe II: world annual CO2 ----------
-p0, p1y = P2_RANGE
-p2_years = list(range(p0, p1y + 1))
-p2_co2 = []
-for y in p2_years:
-    row = world.get(y)
-    v = num(row["co2"]) if row else None
-    if v is not None and v <= 0:
-        v = None
-    p2_co2.append(v)
+# ---------- Mixed: human forcing + independent Earth-system response ----------
+gist = {}
+gl = open(GIST).read().splitlines()
+hi = next(i for i, l in enumerate(gl) if l.startswith("Year"))
+jd = gl[hi].split(",").index("J-D")
+for l in gl[hi + 1:]:
+    p = l.split(",")
+    if not p[0].strip().isdigit():
+        continue
+    v = p[jd].strip()
+    if v in ("", "***"):
+        continue
+    gist[int(p[0])] = float(v) / 100.0
+mlo = {}
+for l in open(MLO):
+    if l.startswith("#") or l.lower().startswith("year"):
+        continue
+    p = l.split(",")
+    if len(p) < 2 or not p[0].strip()[:4].isdigit():
+        continue
+    mlo[int(float(p[0]))] = float(p[1])
+
+MR = (1965, 2022)
+myrs = list(range(MR[0], MR[1] + 1))
+defs = [
+    ("population",        "pos",    lambda y: num(world[y]["population"]) if world.get(y) else None),
+    ("co2 emissions",     "pos",    lambda y: num(world[y]["co2"]) if world.get(y) else None),
+    ("primary energy",    "pos",    lambda y: num(world[y]["primary_energy_consumption"]) if world.get(y) else None),
+    ("CO2 concentration", "pos",    lambda y: mlo.get(y)),
+    ("temperature",       "signed", lambda y: gist.get(y)),
+]
+mixed_block = {"_years": myrs, "_kinds": {}}
+for label, kind, get in defs:
+    s = [get(y) for y in myrs]
+    if any(v is None for v in s):
+        continue
+    mixed_block[label] = s
+    mixed_block["_kinds"][label] = kind
 
 data = {
-    "meta": {
-        "source": "Our World in Data / Global Carbon Project (owid-co2-data.csv)",
-        "world_range": WORLD_RANGE,
-        "country_range": COUNTRY_RANGE,
-        "p2_range": P2_RANGE,
-        "world_indicators": WORLD_IND,
-        "n_countries": len(country_names),
-        "country_names": country_names,
-    },
-    "p1": {
-        "world": {"years": world_years, "labels": WORLD_IND, "series": world_series},
-        "country": {"years": country_years, "labels": country_names, "series": country_series},
-    },
+    "meta": {"source": "OWID/Global Carbon Project; NASA GISTEMP; NOAA Mauna Loa",
+             "world_range": WR, "country_range": CR, "mix_range": MR, "p2_range": PR,
+             "country_cap": CAP},
+    "p1": {"world": world_block, "country": country_block, "mixed": mixed_block},
     "p2": {"years": p2_years, "co2": p2_co2},
 }
+json.dump(data, open(os.path.join(TMP, "data.json"), "w"), separators=(",", ":"))
 
-with open(OUT, "w") as f:
-    json.dump(data, f, separators=(",", ":"))
-print(f"  wrote {OUT}", file=sys.stderr)
-
-# ---------- sanity: reproduce the headline numbers ----------
+# ---------- headline reproduction (sanity) ----------
 def log_growth(a):
     o = []
     for i in range(1, len(a)):
@@ -132,50 +151,40 @@ def log_growth(a):
         c = a[i] if a[i] and a[i] > 0 else 1e-9
         o.append(math.log(c/p))
     return o
-
-def win_corr(vars_, start, win):
-    n = len(vars_)
-    z = []
-    for v in vars_:
-        s = v[start:start+win]
-        m = sum(s)/len(s)
+def diff(a): return [a[i]-a[i-1] for i in range(1, len(a))]
+def win_corr(vs, s0, win):
+    n = len(vs); z = []
+    for v in vs:
+        s = v[s0:s0+win]; m = sum(s)/len(s)
         sd = (sum((x-m)**2 for x in s)/len(s))**0.5 or 1e-9
         z.append([(x-m)/sd for x in s])
-    C = [[sum(z[i][k]*z[j][k] for k in range(win))/win for j in range(n)] for i in range(n)]
-    return C
-
-def lambda_max(C):
-    n = len(C)
-    v = [1/n**0.5]*n
+    return [[sum(z[i][k]*z[j][k] for k in range(win))/win for j in range(n)] for i in range(n)]
+def lam(C):
+    n=len(C); v=[1/n**0.5]*n
     for _ in range(200):
-        w = [sum(C[i][j]*v[j] for j in range(n)) for i in range(n)]
-        nm = sum(x*x for x in w)**0.5
-        if nm < 1e-12: break
-        v = [x/nm for x in w]
-    num = sum(v[i]*sum(C[i][j]*v[j] for j in range(n)) for i in range(n))
-    den = sum(x*x for x in v)
-    return num/den
-
-def headline(block, win, label):
-    yrs = block["years"]; series = block["series"]; n = len(series)
-    for mode in ("levels", "growth"):
-        vs = [s[:] if mode == "levels" else log_growth(s) for s in series]
-        npos = len(vs[0]) - win + 1
-        first = lambda_max(win_corr(vs, 0, win))/n
-        last = lambda_max(win_corr(vs, npos-1, win))/n
-        print(f"  {label} {mode:7s}: PC1 {first:.2f} -> {last:.2f}", file=sys.stderr)
-
-def headline_str(block, win, label):
-    yrs = block["years"]; series = block["series"]; n = len(series)
-    parts = [f"{label}(n={n},{yrs[0]}-{yrs[-1]})"]
-    for mode in ("levels", "growth"):
-        vs = [s[:] if mode == "levels" else log_growth(s) for s in series]
-        npos = len(vs[0]) - win + 1
-        first = lambda_max(win_corr(vs, 0, win))/n
-        last = lambda_max(win_corr(vs, npos-1, win))/n
-        parts.append(f"{mode}:{first:.2f}to{last:.2f}")
-    return " ".join(parts)
-
-with open(OUT.replace(".json", "_headline.txt"), "w") as f:
-    f.write(headline_str(data["p1"]["world"], 25, "world") + "\n")
-    f.write(headline_str(data["p1"]["country"], 21, "country") + "\n")
+        w=[sum(C[i][j]*v[j] for j in range(n)) for i in range(n)]
+        nm=sum(x*x for x in w)**0.5
+        if nm<1e-12: break
+        v=[x/nm for x in w]
+    return sum(v[i]*sum(C[i][j]*v[j] for j in range(n)) for i in range(n))/sum(x*x for x in v)
+def head(block, win):
+    names=[k for k in block if k[0]!='_']; kinds=block.get("_kinds",{})
+    series=[block[k] for k in names]; n=len(series); out=[]
+    for mode in ("levels","growth"):
+        if mode=="levels": vs=[s[:] for s in series]
+        else: vs=[diff(series[i]) if kinds.get(names[i])=="signed" else log_growth(series[i]) for i in range(n)]
+        np=len(vs[0])-win+1
+        out.append("%s %.2f->%.2f"%(mode, lam(win_corr(vs,0,win))/n, lam(win_corr(vs,np-1,win))/n))
+    return out
+S=[]
+S.append("world  n=%d %d-%d : %s"%(len(w_used),WR[0],WR[1],",".join(w_used)))
+S.append("   "+" | ".join(head(world_block,25)))
+nc=len([k for k in country_block if k[0]!='_'])
+S.append("country n=%d %d-%d (cap %d)"%(nc,CR[0],CR[1],CAP))
+S.append("   "+" | ".join(head(country_block,21)))
+nm=len([k for k in mixed_block if k[0]!='_'])
+S.append("mixed  n=%d %d-%d : %s"%(nm,MR[0],MR[1],",".join(k for k in mixed_block if k[0]!='_')))
+S.append("   "+" | ".join(head(mixed_block,21)))
+S.append("owid lines=%d md5=%s"%(open(OWID,'rb').read().count(b'\n'), hashlib.md5(open(OWID,'rb').read()).hexdigest()[:10]))
+open(os.path.join(TMP,"summary.txt"),"w").write("\n".join(S)+"\n")
+print("BUILD OK n_world=%d n_country=%d n_mixed=%d"%(len(w_used),nc,nm))
