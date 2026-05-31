@@ -273,7 +273,7 @@
     <p class="note">
       Data — real, observed: Our World in Data / Global Carbon Project (CO₂, energy; world &amp; national, 1900–2022); atmospheric CO₂ concentration from NOAA Mauna Loa; global surface temperature from NASA GISTEMP; AMOC subpolar-gyre SST fingerprint from Caesar et al. 2018 (HadISST). The “Earth + human” set follows Steffen et al. (2015) in pairing socioeconomic drivers with Earth-system indicators. Cumulative CO₂ reads as the forcing axis in Probe II.<br>
       Probe II model — saddle-node (tilted double-well) normal form with additive noise; critical slowing down is an exact property of this model. The plotted state (both the time view and the phase-space / bifurcation view) is a model response illustrating the detection method, not a measured Earth variable; the phase-space equilibrium curve is μ = x³ − x, with stable branches at |x| &gt; 1/√3 and the unstable branch dashed. Real early-warning result cited: P. Ditlevsen &amp; S. Ditlevsen, "Warning of a forthcoming collapse of the Atlantic meridional overturning circulation," Nature Communications (2023).<br>
-      Probe III — Part A is synthetic (proof of concept): a memory-kernel (non-Markovian) response and an AR(1) Markov response driven by the same noise, to contrast a delayed correlation peak with a peak at τ=0. Part B is real: lagged Pearson correlation of linearly-detrended annual CO₂ emissions vs the Caesar 2018 AMOC SST fingerprint, overlap 1871–2016. This is a time-lagged correlation, NOT causal proof and NOT mutual information (MI is unstable on records this short and noisy); detrended levels are used (not first differences, which suppress the multi-decade structure of interest). The claim is narrow: a same-time reading misses delayed structure an AR(1) null does not fully account for.<br>
+      Probe III — Part A is synthetic (proof of concept): a wide-kernel (non-Markovian) response and an AR(1) Markov response driven by the same noise, contrasting a delayed correlation bump with a peak at τ=0; both curves are normalized, so only peak <em>position</em> is meaningful, not height. Part B is real: time-lagged Pearson correlation of quadratically-detrended annual CO₂ emissions vs the Caesar 2018 AMOC SST fingerprint, overlap 1871–2016 (degree-2 polynomial detrend on levels — not first differences, which suppress the multi-decade structure; not linear detrend, which leaves a shared-trend plateau). The pale band is a 95% interval from 1000 AR(1) surrogate pairs (each series' own autocorrelation preserved, no cross-coupling, same poly-2 detrend applied): the observed correlation is inside the band at τ=0 (no significant same-time relation) and pierces the upper band at τ≈24–38 yr (peak ≈0.49 vs band ≈0.26) — a delayed association too large to attribute to autocorrelation or to the detrend itself. This is a lagged correlation, NOT causal proof and NOT mutual information (MI is unstable on records this short).<br>
       Country set — the 40 largest emitters with near-complete annual CO₂ records over 1910–2022, grouped by region in the matrix. Four countries had isolated gaps (South Korea, Malaysia, Greece: 1 year each; Philippines: 3 wartime years) filled by linear interpolation — 6 interpolated values out of ~4,500, affecting no correlation materially.<br>
       Responsibility panel — latest-year (2022) values, real and exact: absolute = annual production-based CO₂ (Mt/yr); per-capita = annual CO₂ ÷ population (t/person/yr); cumulative = total CO₂ since 1750 (Mt). The first two are flows, the third a stock — they are deliberately <em>incommensurable</em> (no shared unit), which is the point: there is no single ledger of responsibility. It is a ranking of levels, not a correlation, so the levels-vs-growth caveat above does not apply.<br>
       Caveat — correlation is not causation: isolating the causal weight of one subsystem on another would require conditional mutual information I(B;A|Z) over the full network, beyond what these correlations show.<br>
@@ -715,27 +715,28 @@ const lagAxis=(css,ctx,w,h,pad,maxTau,curves,markTau)=>{
     // peak marker
     let pk=0;cur.data.forEach((c,t)=>{if(c>cur.data[pk])pk=t;});
     ctx.fillStyle=cur.col;ctx.beginPath();ctx.arc(X(pk),Y(cur.data[pk]),3.5,0,7);ctx.fill();});
-  // tau axis ticks
-  ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';ctx.textAlign='center';
-  [0,Math.round(maxTau/2),maxTau].forEach(t=>ctx.fillText('\u03c4='+t,X(t),h-6));ctx.textAlign='left';
+  // tau axis ticks (right-align the last to avoid clipping)
+  ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';
+  [[0,'left'],[Math.round(maxTau/2),'center'],[maxTau,'right']].forEach(([t,al])=>{ctx.textAlign=al;ctx.fillText('\u03c4='+t,X(t),h-6);});
+  ctx.textAlign='left';
   // movable read line
   if(markTau!=null){const mx=X(markTau);ctx.strokeStyle=css('--accent3');ctx.lineWidth=1.5;
     ctx.beginPath();ctx.moveTo(mx,pT);ctx.lineTo(mx,pT+ph);ctx.stroke();}
 };
 // ---- Part A: synthetic ----
 const LAGSYN=(function(){
-  const N=600, D=14;                          // delay of the memory kernel (years, synthetic)
-  // deterministic-ish driver (no Math.random dependence needed for the shape; use a fixed pseudo-noise)
+  const N=800, D=18;                          // delay of the memory kernel (years, synthetic)
   let seed=12345; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff-0.5;};
   const drv=[];for(let i=0;i<N;i++)drv.push(rnd());
-  // non-Markovian response: delayed, kernel-smoothed echo of the driver + small noise
-  const nm=new Array(N).fill(0);
-  for(let t=0;t<N;t++){let s=0,wsum=0;for(let k=0;k<10;k++){const idx=t-D-k;if(idx>=0){const wt=Math.exp(-k/4);s+=wt*drv[idx];wsum+=wt;}}nm[t]=(wsum?s/wsum:0)+0.25*rnd();}
+  // non-Markovian response: a WIDE Gaussian-ish kernel centred at delay D, so C(tau)
+  // is a smooth rounded bump (not a vertical spike) peaking near tau=D.
+  const nm=new Array(N).fill(0), KW=22, sig=7;
+  for(let t=0;t<N;t++){let s=0,wsum=0;for(let k=-KW;k<=KW;k++){const idx=t-D-k;if(idx>=0&&idx<N){const wt=Math.exp(-(k*k)/(2*sig*sig));s+=wt*drv[idx];wsum+=wt;}}nm[t]=(wsum?s/wsum:0)+0.18*rnd();}
   // AR(1) Markov response driven by same driver, no delay
   const ar=new Array(N).fill(0);const phi=0.6;for(let t=1;t<N;t++)ar[t]=phi*ar[t-1]+drv[t]+0.25*rnd();
   const maxTau=40, cNM=[], cAR=[];
   for(let tau=0;tau<=maxTau;tau++){cNM.push(laggedCorr(nm,drv,tau));cAR.push(laggedCorr(ar,drv,tau));}
-  // normalize each to its own max magnitude for display clarity (shape is the point)
+  // normalize each to its own max magnitude — shape/peak-location is the point, height is not.
   const nrm=a=>{const m=Math.max(...a.map(Math.abs))||1;return a.map(v=>v/m);};
   return {cNM:nrm(cNM),cAR:nrm(cAR),maxTau,D};
 })();
@@ -743,14 +744,13 @@ function drawLagSynth(){
   const cv=document.getElementById('lagSynth');if(!cv)return;const dpr=devicePixelRatio||1,w=cv.clientWidth||760,h=220;
   cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
   const tau=+document.getElementById('tauSynth').value;
-  lagAxis(css,ctx,w,h,{pL:34,pR:8,pT:10,pB:20},LAGSYN.maxTau,
+  lagAxis(css,ctx,w,h,{pL:34,pR:30,pT:10,pB:20},LAGSYN.maxTau,
     [{data:LAGSYN.cAR,col:css('--ink-soft'),lw:1.6},{data:LAGSYN.cNM,col:css('--accent'),lw:2}],tau);
   document.getElementById('tauSynthV').textContent=tau;
-  const cNM=LAGSYN.cNM[tau], cAR=LAGSYN.cAR[tau];
   document.getElementById('lagSynthNote').innerHTML=
-    `<span style="color:var(--accent)">memory kernel</span>: C(\u03c4=${tau}) = ${cNM.toFixed(2)} &nbsp;\u00b7&nbsp; `+
-    `<span style="color:var(--ink-soft)">AR(1) Markov</span>: C(\u03c4=${tau}) = ${cAR.toFixed(2)}. `+
-    `The memory process peaks near \u03c4\u2248${LAGSYN.D} (its cause is delayed); the Markov process peaks at \u03c4=0. Synthetic \u2014 proof of concept.`;
+    `<span style="color:var(--accent)">memory kernel</span> peaks near \u03c4\u2248${LAGSYN.D} \u2014 its cause sits years upstream; `+
+    `<span style="color:var(--ink-soft)">AR(1) Markov</span> peaks at \u03c4=0 and decays \u2014 its present is explained by its immediate past. `+
+    `Synthetic, proof of concept: only the <em>position</em> of each peak carries meaning, not its height (both are normalized).`;
 }
 document.getElementById('tauSynth').oninput=drawLagSynth;
 drawLagSynth();
@@ -765,36 +765,76 @@ const LAGREAL=(function(){
     if(ce==null||fe==null){E.push(null);F.push(null);}else{E.push(ce);F.push(fe);}}
   // drop any nulls by truncating to the longest clean contiguous span
   let bs=0,bl=0,cs=0;for(let i=0;i<E.length;i++){if(E[i]!=null&&F[i]!=null){cs++;if(cs>bl){bl=cs;bs=i-cs+1;}}else cs=0;}
-  const Ec=E.slice(bs,bs+bl), Fc=F.slice(bs,bs+bl), yc0=y0+bs;
-  // Remove a linear trend from each level series (NOT first differences) so we
-  // correlate decadal-scale fluctuations without the shared monotone trend that
-  // makes any two rising curves correlate trivially. First-differencing kills the
-  // very low-frequency, multi-decade structure we are looking for, so we detrend.
-  function detrend(a){const n=a.length;let sx=0,sy=0,sxy=0,sxx=0;for(let i=0;i<n;i++){sx+=i;sy+=a[i];sxy+=i*a[i];sxx+=i*i;}
-    const b=(n*sxy-sx*sy)/(n*sxx-sx*sx),c=(sy-b*sx)/n;return a.map((v,i)=>v-(b*i+c));}
-  const dE=detrend(Ec), dF=detrend(Fc);
+  const Ec=E.slice(bs,bs+bl), Fc=F.slice(bs,bs+bl), yc0=y0+bs, N=bl;
+  // Remove a quadratic trend from each LEVEL series (degree-2 polynomial, NOT first
+  // differences) so we correlate multi-decade fluctuations without the shared rising
+  // trend+curvature that makes any two growing curves correlate trivially. (Linear
+  // detrend leaves a +0.25 plateau; differencing kills the very low-frequency
+  // structure we are after; quadratic isolates the decadal-scale variation.)
+  function polydetrend(a,d){const M=a.length,m=d+1,ATA=Array.from({length:m},()=>new Array(m).fill(0)),ATy=new Array(m).fill(0),Xr=[];
+    for(let i=0;i<M;i++){const row=[];for(let p=0;p<=d;p++)row.push(Math.pow(i/M,p));Xr.push(row);}
+    for(let i=0;i<M;i++)for(let p=0;p<m;p++){ATy[p]+=Xr[i][p]*a[i];for(let q=0;q<m;q++)ATA[p][q]+=Xr[i][p]*Xr[i][q];}
+    for(let p=0;p<m;p++){const piv=ATA[p][p];for(let q=0;q<m;q++)ATA[p][q]/=piv;ATy[p]/=piv;for(let r=0;r<m;r++)if(r!==p){const f=ATA[r][p];for(let q=0;q<m;q++)ATA[r][q]-=f*ATA[p][q];ATy[r]-=f*ATy[p];}}
+    return a.map((v,i)=>{let fit=0;for(let p=0;p<m;p++)fit+=ATy[p]*Math.pow(i/M,p);return v-fit;});}
+  const dE=polydetrend(Ec,2), dF=polydetrend(Fc,2);
   const maxTau=60, C=[];
   for(let tau=0;tau<=maxTau;tau++) C.push(laggedCorr(dF,dE,tau)); // F(t) vs E(t-tau): fingerprint responds to past emissions
-  // AR(1) null: corr expected from F's own autocorrelation alone (rough) \u2014 flag residual delayed structure
-  let pk=0;C.forEach((c,t)=>{if(c>C[pk])pk=t;});
-  return {C,maxTau,span:bl,y0:yc0,y1:yc0+bl-1,peakTau:pk};
+  // ---- AR(1) surrogate band: is the delayed bump real or a detrend artefact? ----
+  // Fit AR(1) to each detrended residual, generate 1000 INDEPENDENT pairs (no true
+  // coupling) with the SAME autocorrelation, run them through the SAME poly2 detrend,
+  // and take the 2.5/97.5 percentile of C(tau). A real bump must pierce this band;
+  // a detrend artefact would not (the surrogates share the artefact).
+  function ar1(r){let num=0,den=0;for(let i=1;i<r.length;i++){num+=r[i]*r[i-1];den+=r[i-1]*r[i-1];}const phi=den?num/den:0;
+    let sse=0;for(let i=1;i<r.length;i++){const e=r[i]-phi*r[i-1];sse+=e*e;}return {phi,sd:Math.sqrt(sse/(r.length-1))};}
+  const aE=ar1(dE), aF=ar1(dF);
+  let seed=987654321; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+  const gss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  const mk=(phi,sd)=>{const x=new Array(N).fill(0);x[0]=sd*gss();for(let i=1;i<N;i++)x[i]=phi*x[i-1]+sd*gss();return x;};
+  const B=1000, dist=Array.from({length:maxTau+1},()=>[]);
+  for(let b=0;b<B;b++){const sE=polydetrend(mk(aE.phi,aE.sd),2), sF=polydetrend(mk(aF.phi,aF.sd),2);
+    for(let tau=0;tau<=maxTau;tau++)dist[tau].push(laggedCorr(sF,sE,tau));}
+  const lo=[],hi=[];for(let t=0;t<=maxTau;t++){const s=dist[t].sort((a,b)=>a-b);lo.push(s[Math.floor(0.025*B)]);hi.push(s[Math.floor(0.975*B)]);}
+  // peak among taus where the real curve pierces the upper band (a SIGNIFICANT bump)
+  let pk=-1;for(let t=1;t<=maxTau;t++){if(C[t]>hi[t]&&(pk<0||C[t]>C[pk]))pk=t;}
+  if(pk<0){pk=0;C.forEach((c,t)=>{if(c>C[pk])pk=t;});}
+  // significant band = contiguous taus around pk that pierce
+  let sigLo=pk,sigHi=pk;while(sigLo>0&&C[sigLo-1]>hi[sigLo-1])sigLo--;while(sigHi<maxTau&&C[sigHi+1]>hi[sigHi+1])sigHi++;
+  return {C,lo,hi,maxTau,span:bl,y0:yc0,y1:yc0+bl-1,peakTau:pk,peakVal:C[pk],sigLo,sigHi};
 })();
 function drawLagReal(){
   const cv=document.getElementById('lagReal');if(!cv||!LAGREAL)return;const dpr=devicePixelRatio||1,w=cv.clientWidth||760,h=220;
   cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
   const win=+document.getElementById('winSpan').value;
   const visible = LAGREAL.peakTau<=win;
+  const pL=34,pR=30,pT=10,pB=22,pw=w-pL-pR,ph=h-pT-pB;
+  const X=tau=>pL+pw*(tau/LAGREAL.maxTau), Y=c=>pT+ph*(1-(Math.max(-0.5,Math.min(1,c))+0.5)/1.5);
+  ctx.clearRect(0,0,w,h);
+  // gridlines + y labels
+  ctx.strokeStyle=css('--rule');ctx.lineWidth=1;ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';
+  [-0.5,0,0.5,1].forEach(t=>{const y=Y(t);ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(w-pR,y);ctx.stroke();ctx.fillText(t.toFixed(1),4,y+3);});
+  // observation window shade (0..win) + edge
+  ctx.fillStyle='rgba(192,137,47,.13)';ctx.fillRect(pL,pT,X(win)-pL,ph);
+  ctx.strokeStyle=css('--accent3');ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(win),pT);ctx.lineTo(X(win),pT+ph);ctx.stroke();
+  // surrogate 95% band (ribbon)
+  ctx.fillStyle='rgba(87,83,74,.18)';ctx.beginPath();
+  LAGREAL.hi.forEach((v,t)=>{const x=X(t),y=Y(v);t?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  for(let t=LAGREAL.lo.length-1;t>=0;t--){ctx.lineTo(X(t),Y(LAGREAL.lo[t]));}
+  ctx.closePath();ctx.fill();
+  // real C(tau)
   const col = visible? css('--accent2') : css('--ink-soft');
-  lagAxis(css,ctx,w,h,{pL:34,pR:8,pT:10,pB:20},LAGREAL.maxTau,[{data:LAGREAL.C,col,lw:2}],null);
-  // shaded observation window (0..win) + edge line
-  const pL=34,pR=8,pw=w-pL-pR,ph=h-30;const X=tau=>pL+pw*(tau/LAGREAL.maxTau);
-  ctx.fillStyle='rgba(192,137,47,.14)';ctx.fillRect(pL,10,X(win)-pL,ph);
-  ctx.strokeStyle=css('--accent3');ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(win),10);ctx.lineTo(X(win),10+ph);ctx.stroke();
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();
+  LAGREAL.C.forEach((c,t)=>{const x=X(t),y=Y(c);t?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  // peak marker (only if significant \u2014 it is)
+  ctx.fillStyle=css('--accent');ctx.beginPath();ctx.arc(X(LAGREAL.peakTau),Y(LAGREAL.peakVal),4,0,7);ctx.fill();
+  // tau ticks (right-aligned last to avoid clipping)
+  ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';
+  [[0,'left'],[Math.round(LAGREAL.maxTau/2),'center'],[LAGREAL.maxTau,'right']].forEach(([t,al])=>{ctx.textAlign=al;ctx.fillText('\u03c4='+t,X(t),h-6);});
+  ctx.textAlign='left';
   document.getElementById('winSpanV').textContent=win;
-  document.getElementById('peakTauV').textContent=LAGREAL.peakTau+' yr';
+  document.getElementById('peakTauV').textContent='\u2248'+LAGREAL.sigLo+'\u2013'+LAGREAL.sigHi+' yr';
   document.getElementById('lagRealNote').innerHTML = visible
-    ? `Within a ${win}-year window the peak correlation (\u03c4=${LAGREAL.peakTau} yr) is still visible. Overlap ${LAGREAL.y0}\u2013${LAGREAL.y1}, ${LAGREAL.span} yrs. A same-time (\u03c4=0) reading alone would understate the link.`
-    : `<b style="color:var(--accent)">The cause is now imperceptible.</b> The peak sits at \u03c4=${LAGREAL.peakTau} yr, outside a ${win}-year window \u2014 present in the record, absent from perception. Nothing about the causation changed; only the horizon did.`;
+    ? `<b>Pale band</b> = the range produced by 1000 imaginary pairs with the same autocorrelation but <em>no real coupling</em>. The actual correlation is flat and unremarkable at \u03c4=0 (inside the band \u2014 nothing visible at the same time), then rises to a bump at \u03c4\u2248${LAGREAL.sigLo}\u2013${LAGREAL.sigHi} years that <b style="color:var(--accent)">pierces the band</b> \u2014 too high to be chance. The structure is not in the present moment; it is decades downstream.`
+    : `<b style="color:var(--accent)">The cause is now imperceptible.</b> The significant bump sits at \u03c4\u2248${LAGREAL.sigLo}\u2013${LAGREAL.sigHi} yr, outside a ${win}-year window \u2014 present in the record, absent from perception. Nothing about the causation changed; only the horizon did.`;
 }
 document.getElementById('winSpan').oninput=drawLagReal;
 drawLagReal();
