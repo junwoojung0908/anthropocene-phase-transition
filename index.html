@@ -725,20 +725,24 @@ const lagAxis=(css,ctx,w,h,pad,maxTau,curves,markTau)=>{
 };
 // ---- Part A: synthetic ----
 const LAGSYN=(function(){
-  const N=800, D=18;                          // delay of the memory kernel (years, synthetic)
+  const N=1000, D=18;                         // delay of the memory kernel (synthetic units)
   let seed=12345; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff-0.5;};
   const drv=[];for(let i=0;i<N;i++)drv.push(rnd());
-  // non-Markovian response: a WIDE Gaussian-ish kernel centred at delay D, so C(tau)
-  // is a smooth rounded bump (not a vertical spike) peaking near tau=D.
-  const nm=new Array(N).fill(0), KW=22, sig=7;
-  for(let t=0;t<N;t++){let s=0,wsum=0;for(let k=-KW;k<=KW;k++){const idx=t-D-k;if(idx>=0&&idx<N){const wt=Math.exp(-(k*k)/(2*sig*sig));s+=wt*drv[idx];wsum+=wt;}}nm[t]=(wsum?s/wsum:0)+0.18*rnd();}
-  // AR(1) Markov response driven by same driver, no delay
+  // non-Markovian response: a wide Gaussian kernel centred at delay D, so C(tau) is a
+  // single smooth rounded bump (not a spike) — the lagged-correlation peak lands a few
+  // steps past D (kernel half-width adds to the delay); we read its actual location below.
+  const nm=new Array(N).fill(0), KW=28, sig=9;
+  for(let t=0;t<N;t++){let s=0,wsum=0;for(let k=-KW;k<=KW;k++){const idx=t-D-k;if(idx>=0&&idx<N){const wt=Math.exp(-(k*k)/(2*sig*sig));s+=wt*drv[idx];wsum+=wt;}}nm[t]=(wsum?s/wsum:0)+0.12*rnd();}
+  // AR(1) Markov response driven by same driver, no delay (peaks at tau=0, decays)
   const ar=new Array(N).fill(0);const phi=0.6;for(let t=1;t<N;t++)ar[t]=phi*ar[t-1]+drv[t]+0.25*rnd();
   const maxTau=40, cNM=[], cAR=[];
   for(let tau=0;tau<=maxTau;tau++){cNM.push(laggedCorr(nm,drv,tau));cAR.push(laggedCorr(ar,drv,tau));}
-  // normalize each to its own max magnitude — shape/peak-location is the point, height is not.
+  // normalize each to its OWN max magnitude so both peaks reach 1.0: the AR(1) peak is
+  // at tau=0, the memory peak is delayed. Only peak POSITION is meaningful, not height.
   const nrm=a=>{const m=Math.max(...a.map(Math.abs))||1;return a.map(v=>v/m);};
-  return {cNM:nrm(cNM),cAR:nrm(cAR),maxTau,D};
+  const cNMn=nrm(cNM), cARn=nrm(cAR);
+  let nmPeak=0;cNMn.forEach((v,t)=>{if(v>cNMn[nmPeak])nmPeak=t;});
+  return {cNM:cNMn,cAR:cARn,maxTau,nmPeak};
 })();
 function drawLagSynth(){
   const cv=document.getElementById('lagSynth');if(!cv)return;const dpr=devicePixelRatio||1,w=cv.clientWidth||760,h=220;
@@ -748,7 +752,7 @@ function drawLagSynth(){
     [{data:LAGSYN.cAR,col:css('--ink-soft'),lw:1.6},{data:LAGSYN.cNM,col:css('--accent'),lw:2}],tau);
   document.getElementById('tauSynthV').textContent=tau;
   document.getElementById('lagSynthNote').innerHTML=
-    `<span style="color:var(--accent)">memory kernel</span> peaks near \u03c4\u2248${LAGSYN.D} \u2014 its cause sits years upstream; `+
+    `<span style="color:var(--accent)">memory kernel</span> peaks near \u03c4\u2248${LAGSYN.nmPeak} \u2014 its cause sits years upstream; `+
     `<span style="color:var(--ink-soft)">AR(1) Markov</span> peaks at \u03c4=0 and decays \u2014 its present is explained by its immediate past. `+
     `Synthetic, proof of concept: only the <em>position</em> of each peak carries meaning, not its height (both are normalized).`;
 }
