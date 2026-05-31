@@ -1,0 +1,5 @@
+# raw OWID CSV is large and regenerable — don't commit it
+owid-co2-data.csv
+*.csv
+.DS_Store
+.Rhistory
