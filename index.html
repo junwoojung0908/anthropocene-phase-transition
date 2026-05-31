@@ -11,7 +11,7 @@
   :root{
     --paper:#f4f0e7; --paper2:#ece5d6; --ink:#1a1916; --ink-soft:#57534a;
     --rule:#c7bfab; --accent:#a8322d; --accent2:#2f5d62; --accent3:#c0892f;
-    --grid:#ded6c4; --maxw:820px;
+    --grid:#ded6c4; --maxw:960px; --readw:720px;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -19,9 +19,10 @@
     font-family:"Newsreader",Georgia,serif;font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased;
     background-image:radial-gradient(circle at 50% -8%,#faf6ec 0%,var(--paper) 52%);}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px;}
-  /* panels break out wider than the reading column on desktop */
-  .panel.wide{max-width:1120px;margin-left:50%;transform:translateX(-50%);width:calc(100vw - 52px);}
-  @media(max-width:1180px){.panel.wide{width:auto;margin-left:0;transform:none;}}
+  /* unified column: panels & dividers span the full 960, prose is capped for readability */
+  section>p, section>h1, section>h2, section>.lede, section>.tagline,
+  section>.kicker, section>.byline, section>.caption{max-width:var(--readw);}
+  .panel.wide{max-width:none;}
   .mono{font-family:"Space Mono",monospace;}
   .kicker{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);}
   h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(40px,8vw,76px);line-height:.98;letter-spacing:-.02em;margin:.14em 0 .12em;}
