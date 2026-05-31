@@ -10,8 +10,8 @@
 <style>
   :root{
     --paper:#f4f0e7; --paper2:#ece5d6; --ink:#1a1916; --ink-soft:#57534a;
-    --rule:#c7bfab; --accent:#a8322d; --accent2:#2f5d62; --grid:#ded6c4;
-    --maxw:820px;
+    --rule:#c7bfab; --accent:#a8322d; --accent2:#2f5d62; --accent3:#c0892f;
+    --grid:#ded6c4; --maxw:820px;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -55,16 +55,38 @@
   footer{padding:42px 0 90px;border-top:1px solid var(--rule);}
   a{color:var(--accent);}
   .pill{font-family:"Space Mono",monospace;font-size:11px;border:1px solid var(--rule);border-radius:999px;padding:3px 9px;color:var(--ink-soft);}
+  /* ---- enriched section dividers ---- */
+  section{position:relative;}
+  section:not(.hero)::before{content:"";position:absolute;top:-1px;left:0;width:64px;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent3));}
+  /* ---- hero ambient ---- */
+  .hero{position:relative;overflow:hidden;}
+  #ambient{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.5;pointer-events:none;}
+  .hero>*{position:relative;z-index:1;}
+  .dropcap::first-letter{font-family:"Fraunces",serif;font-weight:900;float:left;font-size:4.4em;
+    line-height:.72;padding:6px 12px 0 0;color:var(--accent);}
+  /* ---- raw-curves panel ---- */
+  .curve-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;}
+  .curve-legend span{font-family:"Space Mono",monospace;font-size:10.5px;color:var(--ink-soft);
+    display:inline-flex;align-items:center;gap:5px;}
+  .curve-legend i{width:14px;height:3px;border-radius:2px;display:inline-block;}
+  /* ---- heatmap labels + hover ---- */
+  .heat-wrap{position:relative;}
+  #heatTip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);
+    font-family:"Space Mono",monospace;font-size:11px;line-height:1.4;padding:6px 9px;border-radius:6px;
+    opacity:0;transition:opacity .1s;transform:translate(-50%,-115%);white-space:nowrap;z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  #heatTip b{color:#f0b8a0;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <section class="hero">
+    <canvas id="ambient"></canvas>
     <div class="kicker">Anthropocene Humanities · Final Project · A computational essay</div>
     <h1>A phase transition<br>you cannot quite <em>measure</em></h1>
     <p class="lede">If the Anthropocene is a phase transition in the Earth system, can we actually see it in the data? This is an honest attempt — and an account of the wall it hits.</p>
-    <p style="margin-top:20px;">Physics gives the Anthropocene a tempting shape: a system pushed across a threshold into a qualitatively new regime. I wanted to test that, not assert it — to take the metaphor seriously enough to let real data refuse it. What follows are two probes, both run on observed records (CO₂, energy, economy, 1850–2022), and a conclusion neither of them lets me escape.</p>
+    <p class="dropcap" style="margin-top:20px;">Physics gives the Anthropocene a tempting shape: a system pushed across a threshold into a qualitatively new regime. I wanted to test that, not assert it — to take the metaphor seriously enough to let real data refuse it. What follows are two probes, both run on observed records (CO₂, energy, economy, 1850–2022), and a conclusion neither of them lets me escape.</p>
     <div class="byline">Junwoo Jung · KAIST Physics · interactive · prototype</div>
   </section>
 
@@ -88,10 +110,17 @@
         </div>
       </div>
 
-      <div class="viz-row">
-        <div>
+      <div>
+        <div class="lab">The raw series themselves — <span id="curveMode">levels</span>, each rescaled to its own range · <span id="curveWin"></span></div>
+        <canvas id="rawCurves" width="760" height="230"></canvas>
+        <div class="curve-legend" id="curveLegend"></div>
+      </div>
+
+      <div class="viz-row" style="margin-top:18px;">
+        <div class="heat-wrap">
           <div class="lab">Correlation matrix · window <span id="winYears"></span></div>
           <canvas id="heat" width="360" height="360"></canvas>
+          <div id="heatTip"></div>
         </div>
         <div>
           <div class="lab">Collective mode over time — PC1 share of variance</div>
@@ -226,16 +255,67 @@ function divColor(r){ // -1..1 -> teal..paper..oxblood
   else{const t=Math.min(1,-r);c=pap.map((p,i)=>Math.round(p+(teal[i]-p)*t));}
   return `rgb(${c[0]},${c[1]},${c[2]})`;
 }
+const ABBR={population:'pop',co2:'CO₂',coal_co2:'coal',oil_co2:'oil',gas_co2:'gas',
+  cement_co2:'cement',land_use_change_co2:'land-use',methane:'CH₄',nitrous_oxide:'N₂O',
+  'co2 emissions':'emissions','primary energy':'energy','CO2 concentration':'CO₂ conc.',temperature:'temp'};
+const abbrev=s=>ABBR[s]||(s.length>10?s.slice(0,9)+'…':s);
+// distinct, palette-consistent colours for the per-series curves
+const CURVE_COLS=['#a8322d','#2f5d62','#c0892f','#1a1916','#7c5295','#3d7a4f','#b5573a','#4a6fa5','#8a7a3a'];
+let HEAT=null; // {names,C,LM,cell,n}
 function drawHeat(){
   const {vars,WIN}=recompLine(); const n=vars.length;
+  const names=namesFor(P.ds);
   const C=winCorr(vars,P.pos,WIN);
   const cv=document.getElementById('heat');const dpr=devicePixelRatio||1;
   const size=cv.clientWidth||360; cv.width=size*dpr;cv.height=size*dpr;cv.style.height=size+'px';
   const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,size,size);
-  const cell=size/n;
-  for(let i=0;i<n;i++)for(let j=0;j<n;j++){ctx.fillStyle=divColor(C[i][j]);ctx.fillRect(j*cell,i*cell,Math.ceil(cell),Math.ceil(cell));}
+  const showLab = n<=12;
+  const LM = showLab? 70 : 0;
+  const cell=(size-LM)/n;
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){ctx.fillStyle=divColor(C[i][j]);ctx.fillRect(LM+j*cell,LM+i*cell,Math.ceil(cell),Math.ceil(cell));}
+  if(showLab){
+    ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';
+    for(let i=0;i<n;i++){const lab=abbrev(names[i]);
+      ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(lab,LM-6,LM+(i+0.5)*cell);
+      ctx.save();ctx.translate(LM+(i+0.5)*cell,LM-6);ctx.rotate(-Math.PI/2);
+      ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lab,0,0);ctx.restore();}
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  }
+  HEAT={names,C,LM,cell,n};
   document.getElementById('pc1v').textContent=(lambdaMax(C)/n).toFixed(2);
   document.getElementById('mcv').textContent=meanOff(C).toFixed(2);
+}
+function drawCurves(){
+  const {vars,yrs,WIN}=recompLine(); const n=vars.length;const L=vars[0].length;
+  const names=namesFor(P.ds);
+  const cv=document.getElementById('rawCurves');const dpr=devicePixelRatio||1;
+  const w=cv.clientWidth||760,h=230;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+  const padL=8,padR=8,padT=10,padB=20,pw=w-padL-padR,ph=h-padT-padB;
+  // current window highlight band
+  const bx0=padL+pw*(P.pos/(L-1)), bx1=padL+pw*((P.pos+WIN-1)/(L-1));
+  ctx.fillStyle='rgba(192,137,47,.16)';ctx.fillRect(bx0,padT,bx1-bx0,ph);
+  ctx.strokeStyle='rgba(192,137,47,.5)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(bx0,padT);ctx.lineTo(bx0,padT+ph);ctx.moveTo(bx1,padT);ctx.lineTo(bx1,padT+ph);ctx.stroke();
+  // baseline for growth mode (0.5 ~ zero growth after min-max would vary; draw simple mid guide)
+  const many=n>12;
+  for(let s=0;s<n;s++){
+    const v=vars[s];let mn=Infinity,mx=-Infinity;for(const x of v){if(x<mn)mn=x;if(x>mx)mx=x;}
+    const rng=(mx-mn)||1;
+    ctx.strokeStyle=many?'rgba(26,25,22,.18)':CURVE_COLS[s%CURVE_COLS.length];
+    ctx.lineWidth=many?1:1.6;ctx.globalAlpha=many?.7:.95;ctx.beginPath();
+    for(let i=0;i<L;i++){const x=padL+pw*(i/(L-1));const y=padT+ph*(1-(v[i]-mn)/rng);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  // year ticks
+  ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';ctx.textAlign='left';
+  [0,Math.floor(L/2),L-1].forEach((i,k)=>{const x=padL+pw*(i/(L-1));ctx.textAlign=k===0?'left':k===2?'right':'center';ctx.fillText(yrs[i],x,h-6);});
+  ctx.textAlign='left';
+  // legend
+  const lg=document.getElementById('curveLegend');
+  if(many){lg.innerHTML='<span style="opacity:.8">'+n+' countries, each rescaled to its own range — a rising bundle in levels, noise in growth.</span>';}
+  else{lg.innerHTML=names.map((nm,i)=>`<span><i style="background:${CURVE_COLS[i%CURVE_COLS.length]}"></i>${abbrev(nm)}</span>`).join('');}
 }
 function drawLine(){
   const {pc,cy}=recompLine();
@@ -272,7 +352,9 @@ function renderP1(){
   const sl=document.getElementById('winSlider');sl.max=npos-1;sl.value=P.pos;
   const y0=yrs[P.pos],y1=yrs[P.pos+WIN-1];
   document.getElementById('winYears').textContent=`${y0}–${y1}`;
-  drawHeat();drawLine();setCaption();
+  document.getElementById('curveMode').textContent=P.mode==='growth'?'year-to-year growth':'levels';
+  document.getElementById('curveWin').textContent=`window ${y0}–${y1} highlighted`;
+  drawCurves();drawHeat();drawLine();setCaption();
 }
 document.querySelectorAll('#dsSeg button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#dsSeg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');
@@ -289,6 +371,44 @@ document.getElementById('winSlider').oninput=e=>{P.pos=+e.target.value;renderP1(
 
 renderP1();
 window.addEventListener('resize',()=>{cache={};renderP1();});
+
+/* ---------- heatmap hover ---------- */
+(function(){
+  const cv=document.getElementById('heat'), tip=document.getElementById('heatTip');
+  cv.addEventListener('mousemove',e=>{
+    if(!HEAT){tip.style.opacity=0;return;}
+    const r=cv.getBoundingClientRect();
+    const x=e.clientX-r.left, y=e.clientY-r.top;
+    const {LM,cell,n,names,C}=HEAT;
+    const j=Math.floor((x-LM)/cell), i=Math.floor((y-LM)/cell);
+    if(i<0||j<0||i>=n||j>=n){tip.style.opacity=0;return;}
+    tip.innerHTML=`${abbrev(names[i])} × ${abbrev(names[j])}<br>corr = <b>${C[i][j].toFixed(2)}</b>`;
+    tip.style.left=x+'px';tip.style.top=y+'px';tip.style.opacity=1;
+  });
+  cv.addEventListener('mouseleave',()=>tip.style.opacity=0);
+})();
+
+/* ---------- hero ambient: faint rising curves ---------- */
+(function(){
+  const cv=document.getElementById('ambient');if(!cv)return;
+  const ctx=cv.getContext('2d');let w,h;const dpr=devicePixelRatio||1;
+  function size(){const r=cv.parentElement.getBoundingClientRect();w=r.width;h=r.height;cv.width=w*dpr;cv.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+  size();window.addEventListener('resize',size);
+  const cols=['#a8322d','#2f5d62','#c0892f'],lines=[];
+  for(let i=0;i<7;i++)lines.push({ph:Math.random()*6.28,sp:.0005+Math.random()*.0007,amp:.05+Math.random()*.05,base:.16+i*0.1,col:cols[i%3]});
+  function frame(t){
+    ctx.clearRect(0,0,w,h);
+    for(const L of lines){
+      ctx.beginPath();ctx.strokeStyle=L.col;ctx.globalAlpha=.13;ctx.lineWidth=1.4;
+      for(let x=0;x<=w;x+=8){const fx=x/w;
+        const y=h*(1-(L.base+fx*0.5+Math.sin(fx*5+L.ph+t*L.sp)*L.amp));
+        x?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
 
 /* ---------- Path 2: saddle-node CSD sandbox ---------- */
 const MUC=2/(3*Math.sqrt(3)); // fold ~0.385
