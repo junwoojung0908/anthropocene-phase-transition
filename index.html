@@ -105,11 +105,11 @@
     <div class="kicker">Anthropocene Humanities · Final Project · A computational essay</div>
     <h1>A phase transition<br>you cannot quite <em>measure</em></h1>
     <p class="lede">If the Anthropocene is a phase transition in the Earth system, can we actually see it in the data? This is an honest attempt — and an account of the wall it hits.</p>
-    <p class="dropcap" style="margin-top:20px;">Physics gives the Anthropocene a tempting shape: a system pushed across a threshold into a qualitatively new regime. I wanted to test that, not assert it — to take the metaphor seriously enough to let real data refuse it. What follows are two probes, both run on observed records (CO₂, energy, economy, 1850–2022), and a conclusion neither of them lets me escape.</p>
-    <div class="byline">Junwoo Jung · KAIST Physics · interactive · prototype</div>
+    <p class="dropcap" style="margin-top:20px;">Physics gives the Anthropocene a tempting shape: a system pushed across a threshold into a qualitatively new regime. I wanted to test that, not assert it — to take the metaphor seriously enough to let real data refuse it. What follows are three probes, all run on observed records (CO₂, energy, economy, 1850–2022), and a conclusion none of them lets me escape.</p>
+    <div class="byline">Junwoo Jung · KAIST Physics · interactive</div>
   </section>
 
-  <!-- ===================== PATH 1 ===================== -->
+  <!-- ===================== PROBE I ===================== -->
   <section>
     <div class="kicker">Probe I — Correlation structure</div>
     <h2>The transition the <em>scale invents</em></h2>
@@ -174,7 +174,7 @@
     <p>Switch to <b>growth rates</b> and the blaze of red collapses. The "one synchronized system" was an artifact: any set of monotonically rising curves correlates near 1, whether or not anything is coupled. What survives honest detrending is not a clean 1950 transition but episodic synchrony — wars, oil shocks, 2008, the pandemic — shared shocks, not a phase change. The clean transition lived in the <em>choice of representation</em>, not in the world.</p>
   </section>
 
-  <!-- ===================== PATH 2 ===================== -->
+  <!-- ===================== PROBE II ===================== -->
   <section>
     <div class="kicker">Probe II — Critical slowing down</div>
     <h2>The transition the data can <em>barely see</em></h2>
@@ -277,7 +277,7 @@
       Country set — the 40 largest emitters with near-complete annual CO₂ records over 1910–2022, grouped by region in the matrix. Four countries had isolated gaps (South Korea, Malaysia, Greece: 1 year each; Philippines: 3 wartime years) filled by linear interpolation — 6 interpolated values out of ~4,500, affecting no correlation materially.<br>
       Responsibility panel — latest-year (2022) values, real and exact: absolute = annual production-based CO₂ (Mt/yr); per-capita = annual CO₂ ÷ population (t/person/yr); cumulative = total CO₂ since 1750 (Mt). The first two are flows, the third a stock — they are deliberately <em>incommensurable</em> (no shared unit), which is the point: there is no single ledger of responsibility. It is a ranking of levels, not a correlation, so the levels-vs-growth caveat above does not apply.<br>
       Caveat — correlation is not causation: isolating the causal weight of one subsystem on another would require conditional mutual information I(B;A|Z) over the full network, beyond what these correlations show.<br>
-      AI usage — built with Claude as a coding-and-thinking partner; the framing, the phase-transition argument, the methodological choices (growth vs levels; what counts as a fair test), and all data and interpretive judgments are the author's.
+      AI usage — built with Claude as a coding-and-thinking partner; the framing, the phase-transition argument, the methodological choices (growth vs levels, detrending and the surrogate significance test, what counts as a fair test), and all data and interpretive judgments are the author's.
     </p>
   </footer>
 </div>
@@ -319,7 +319,7 @@ function lambdaMax(C){const n=C.length;let v=new Array(n).fill(1/Math.sqrt(n));
   let num=0,den=0;for(let i=0;i<n;i++){let r=0;for(let j=0;j<n;j++)r+=C[i][j]*v[j];num+=v[i]*r;den+=v[i]*v[i];}return num/den;}
 function meanOff(C){const n=C.length;let s=0,c=0;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){s+=C[i][j];c++;}return s/c;}
 
-/* ---------- Path 1 state + render ---------- */
+/* ---------- Probe I state + render ---------- */
 let P={ds:'world',mode:'levels',win:25,pos:0};
 let cache={};
 function getCfg(){ return {WIN: P.ds==='world'?25:21}; }
@@ -548,7 +548,7 @@ window.addEventListener('resize',()=>{cache={};renderP1();});
   requestAnimationFrame(frame);
 })();
 
-/* ---------- Path 2: saddle-node CSD sandbox ---------- */
+/* ---------- Probe II: saddle-node CSD sandbox ---------- */
 const MUC=2/(3*Math.sqrt(3)); // fold ~0.385
 let mu=-0.45, x=-1.25, sigma=0.075, dt=0.04;
 let buf=[]; const BUF=380, WINc=140;
@@ -646,7 +646,7 @@ document.getElementById('rampBtn').onclick=function(){ramping=!ramping;this.text
 for(let i=0;i<BUF;i++)stepSim(); // warm up
 requestAnimationFrame(loop);
 
-/* ---------- Path 2b: real-data CSD honesty plot ---------- */
+/* ---------- Probe II-b: real-data CSD honesty plot ---------- */
 (function(){
   const co2=D.p2.co2, yrs=D.p2.years;
   // align: drop nulls
