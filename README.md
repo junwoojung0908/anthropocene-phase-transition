@@ -12,7 +12,9 @@ Two probes, both run client-side (vanilla JS + canvas) on **real records**:
   - **world** — 9 OWID/GCP indicators (population, CO₂ and its sources, land-use, CH₄, N₂O), 1900–2022.
   - **countries** — the 40 largest emitters with gap-free CO₂ records, 1910–2022.
   - **Earth + human** — human drivers (population, emissions, energy) paired with **independent Earth-system measurements** (atmospheric CO₂ concentration, global surface temperature), 1965–2022, following Steffen et al. (2015). Shows the coupling that is obvious in levels becomes invisible in honest growth rates — the temperature response decouples into internal variability.
-- **Probe II — Critical slowing down.** A saddle-node tipping model (exact physics) with forcing read as cumulative CO₂: variance and lag-1 autocorrelation climb *before* the tip, and the tip does not reverse (hysteresis). A companion panel runs the *same* detector on real aggregate world-CO₂ growth and finds no clean signal — because the warning lives in subsystem fingerprints (AMOC, ice sheets, forests), not the aggregate.
+- **Probe II — Critical slowing down.** A saddle-node tipping model (exact physics) with forcing read as cumulative CO₂: variance and lag-1 autocorrelation climb *before* the tip, and the tip does not reverse (hysteresis). Two companion panels run the *same* detector on real data:
+  - on aggregate world-CO₂ growth → **no clean signal** (the planetary average washes it out);
+  - on the **AMOC subpolar-gyre SST fingerprint** (Caesar et al. 2018, HadISST — the warming-compensated index Ditlevsen & Ditlevsen 2023 analysed) → the signal **is there**: with disclosed fixed parameters (detrend bandwidth 50 yr, sliding window 70 yr), lag-1 autocorrelation rises **0.39 → 0.60** (Kendall τ = +0.56) over 1906–1982, and window variance rises in step (τ = +0.84). Same arithmetic, the right representation. This is one observed fingerprint, not a collapse date — it demonstrates the representation-dependence, which is the point.
 
 Both probes hit the same wall: the physics is right, but no finite/local/aggregate measurement fully resolves the phase — and none of it tells us what we owe.
 
@@ -32,6 +34,7 @@ strictly-positive series, first difference for the signed temperature anomaly.
 - **Our World in Data / Global Carbon Project** — `owid-co2-data.csv` (emissions, population, energy).
 - **NASA GISTEMP** — global land-ocean surface temperature anomaly (J-D annual).
 - **NOAA Mauna Loa** — annual mean atmospheric CO₂ concentration.
+- **Caesar et al. 2018 (PIK)** — AMOC subpolar-gyre SST fingerprint (`sg_index_hadisst.txt`, HadISST), `pik-potsdam.de/~caesar/AMOC_slowdown/`.
 
 All series are embedded in `index.html`; the build is fully reproducible (see below).
 

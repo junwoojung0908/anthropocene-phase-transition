@@ -12,19 +12,21 @@ Sources (auto-downloaded if missing):
   NASA GISTEMP global surface temperature anomaly (J-D annual)
   NOAA Mauna Loa annual mean atmospheric CO2 concentration
 """
-import csv, json, math, os, urllib.request, hashlib
+import csv, json, math, os, re, urllib.request, hashlib
 
 TMP = "/tmp"
 OWID = os.path.join(TMP, "owid-co2-data.csv")
 GIST = os.path.join(TMP, "gistemp.csv")
 MLO  = os.path.join(TMP, "mlo.csv")
+SG   = os.path.join(TMP, "sg_index.txt")
 URLS = {
     OWID: "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv",
     GIST: "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv",
     MLO:  "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_mlo.csv",
+    SG:   "https://www.pik-potsdam.de/~caesar/AMOC_slowdown/sg_index_hadisst.txt",
 }
-for p in (OWID, GIST, MLO):
-    if not os.path.exists(p) or os.path.getsize(p) < 1000:
+for p in (OWID, GIST, MLO, SG):
+    if not os.path.exists(p) or os.path.getsize(p) < 500:
         urllib.request.urlretrieve(URLS[p], p)
 
 def num(v):
@@ -134,12 +136,36 @@ for label, kind, get in defs:
     mixed_block[label] = s
     mixed_block["_kinds"][label] = kind
 
+# ---------- AMOC fingerprint (Caesar et al. 2018, HadISST subpolar-gyre index) ----------
+# Single-column file: one annual SST value per line; header gives the year span.
+# This is the warming-compensated index (SG anomaly minus 2x global mean) that
+# Ditlevsen & Ditlevsen (2023) analysed for early-warning signals.
+sg_lines = open(SG).read().splitlines()
+amoc_start = None
+amoc_idx = []
+for l in sg_lines:
+    s = l.strip()
+    if not s or s.startswith("#") or s.startswith("%"):
+        m = re.search(r"(\d{4})\s*[-–]\s*(\d{4})", s)
+        if m:
+            amoc_start = int(m.group(1))
+        continue
+    try:
+        v = float(s.split()[0])
+    except ValueError:
+        continue
+    if v == v:  # not NaN
+        amoc_idx.append(v)
+amoc_years = list(range(amoc_start, amoc_start + len(amoc_idx)))
+
 data = {
-    "meta": {"source": "OWID/Global Carbon Project; NASA GISTEMP; NOAA Mauna Loa",
+    "meta": {"source": "OWID/Global Carbon Project; NASA GISTEMP; NOAA Mauna Loa; "
+                       "Caesar et al. 2018 (HadISST AMOC subpolar-gyre fingerprint)",
              "world_range": WR, "country_range": CR, "mix_range": MR, "p2_range": PR,
-             "country_cap": CAP},
+             "country_cap": CAP, "amoc_range": [amoc_years[0], amoc_years[-1]]},
     "p1": {"world": world_block, "country": country_block, "mixed": mixed_block},
-    "p2": {"years": p2_years, "co2": p2_co2},
+    "p2": {"years": p2_years, "co2": p2_co2,
+           "amoc": {"years": amoc_years, "idx": amoc_idx}},
 }
 json.dump(data, open(os.path.join(TMP, "data.json"), "w"), separators=(",", ":"))
 
