@@ -19,6 +19,9 @@
     font-family:"Newsreader",Georgia,serif;font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased;
     background-image:radial-gradient(circle at 50% -8%,#faf6ec 0%,var(--paper) 52%);}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px;}
+  /* panels break out wider than the reading column on desktop */
+  .panel.wide{max-width:1120px;margin-left:50%;transform:translateX(-50%);width:calc(100vw - 52px);}
+  @media(max-width:1180px){.panel.wide{width:auto;margin-left:0;transform:none;}}
   .mono{font-family:"Space Mono",monospace;}
   .kicker{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);}
   h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(40px,8vw,76px);line-height:.98;letter-spacing:-.02em;margin:.14em 0 .12em;}
@@ -37,7 +40,9 @@
   .seg button.active{background:var(--ink);color:var(--paper);}
   .seg button.active[data-flip="1"]{background:var(--accent);}
   .panel{background:var(--paper2);border:1px solid var(--rule);padding:18px;margin:16px 0;}
-  .viz-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  .viz-row{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:24px;align-items:stretch;}
+  .viz-row>div{display:flex;flex-direction:column;}
+  .viz-row .grow{flex:1 1 auto;min-height:0;}
   @media(max-width:680px){.viz-row{grid-template-columns:1fr;}}
   canvas{display:block;width:100%;height:auto;image-rendering:auto;}
   .lab{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:6px;}
@@ -97,7 +102,7 @@
     <p class="tagline">A phase transition shows up not in any single variable, but in how variables become correlated. So: did the world's subsystems lock into one correlated whole?</p>
     <p>Below, the cross-correlation structure of real global series. The <span class="pill">levels</span> view correlates the raw rising curves; the <span class="pill">growth</span> view correlates their year-to-year changes. One of these tells a clean story of a synchronized planet. The other tells the truth.</p>
 
-    <div class="panel">
+    <div class="panel wide">
       <div class="controls">
         <div class="seg" id="dsSeg">
           <button data-ds="world" class="active">9 world indicators</button>
@@ -112,25 +117,26 @@
 
       <div>
         <div class="lab">The raw series themselves — <span id="curveMode">levels</span>, each rescaled to its own range · <span id="curveWin"></span></div>
-        <canvas id="rawCurves" width="760" height="230"></canvas>
+        <canvas id="rawCurves" width="1040" height="240"></canvas>
         <div class="curve-legend" id="curveLegend"></div>
       </div>
 
-      <div class="viz-row" style="margin-top:18px;">
+      <div class="viz-row" style="margin-top:22px;">
         <div class="heat-wrap">
           <div class="lab">Correlation matrix · window <span id="winYears"></span></div>
-          <canvas id="heat" width="360" height="360"></canvas>
+          <canvas id="heat" width="360" height="360" class="grow"></canvas>
           <div id="heatTip"></div>
         </div>
         <div>
           <div class="lab">Collective mode over time — PC1 share of variance</div>
-          <canvas id="pcline" width="360" height="240"></canvas>
-          <div class="readout">PC1 share: <b id="pc1v">—</b> · mean correlation: <b id="mcv">—</b></div>
-          <div class="slider-wrap">
-            <div class="lab">Slide the window through history</div>
-            <input type="range" id="winSlider" min="0" max="10" value="0"/>
-          </div>
+          <canvas id="pcline" width="640" height="360" class="grow"></canvas>
         </div>
+      </div>
+
+      <div class="readout" style="margin-top:14px;">PC1 share: <b id="pc1v">—</b> · mean correlation: <b id="mcv">—</b></div>
+      <div class="slider-wrap">
+        <div class="lab">Slide the window through history</div>
+        <input type="range" id="winSlider" min="0" max="10" value="0"/>
       </div>
 
       <div class="caption"><span class="ct" id="p1cap"></span><span class="note" id="p1note"></span></div>
@@ -320,7 +326,8 @@ function drawCurves(){
 function drawLine(){
   const {pc,cy}=recompLine();
   const cv=document.getElementById('pcline');const dpr=devicePixelRatio||1;
-  const w=cv.clientWidth||360,h=240;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+  const heatH=document.getElementById('heat').clientHeight||360;
+  const w=cv.clientWidth||640,h=heatH;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
   const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
   const padL=30,padB=22,padT=10,padR=8;const pw=w-padL-padR,ph=h-padB-padT;
   // axes
