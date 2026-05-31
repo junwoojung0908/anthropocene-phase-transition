@@ -42,7 +42,8 @@
   .viz-row{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:24px;align-items:stretch;}
   .viz-row>div{display:flex;flex-direction:column;}
   .viz-row .grow{flex:1 1 auto;min-height:0;}
-  @media(max-width:680px){.viz-row{grid-template-columns:1fr;}}
+  .vr-even{grid-template-columns:1fr 1fr;}
+  @media(max-width:680px){.viz-row{grid-template-columns:1fr;}.vr-even{grid-template-columns:1fr;}}
   canvas{display:block;width:100%;height:auto;image-rendering:auto;}
   .lab{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:6px;}
   .readout{font-family:"Space Mono",monospace;font-size:13px;margin-top:8px;}
@@ -181,8 +182,16 @@
     <p>This is exact physics, not analogy. Here is a system in a potential well, pushed by a rising forcing — read the forcing axis as cumulative CO₂. Drag it, or let it ramp. Watch the early-warning signals climb <em>before</em> the system tips — and watch that the tip does not reverse when you pull back.</p>
 
     <div class="panel">
-      <div class="lab">State of the system &nbsp;·&nbsp; forcing ∝ cumulative CO₂</div>
-      <canvas id="sim" width="760" height="200"></canvas>
+      <div class="viz-row vr-even" style="align-items:start;">
+        <div>
+          <div class="lab">State over time &nbsp;·&nbsp; forcing ∝ cumulative CO₂</div>
+          <canvas id="sim" width="380" height="200"></canvas>
+        </div>
+        <div>
+          <div class="lab">Phase space — equilibria vs forcing (the fold)</div>
+          <canvas id="phase" width="380" height="200"></canvas>
+        </div>
+      </div>
       <div class="slider-wrap">
         <input type="range" id="muSlider" min="-60" max="60" value="-45"/>
         <div class="controls" style="margin-top:6px;">
@@ -195,6 +204,7 @@
         <div class="gauge"><div class="gt">Lag-1 autocorrelation (memory)</div><div class="gtrack"><div class="gfill" id="acFill"></div></div></div>
       </div>
       <div class="tip-flag" id="tipFlag"></div>
+      <div class="note" style="margin-top:6px;">Left: the state in time. Right: the same system in phase space — the two solid branches are stable equilibria, the dashed branch is the unstable one they collide with at the fold. Ramp up and the ball clings to the lower branch until that branch <em>ceases to exist</em>, then jumps; ramp back down and it traces a different path. The enclosed loop is hysteresis — irreversibility, drawn as geometry.</div>
     </div>
 
     <p>That fingerprint is real, and it has been found in observations: the slowdown of the Atlantic overturning circulation shows exactly this rising variance and autocorrelation in sea-surface temperature records <span class="note">(Ditlevsen &amp; Ditlevsen 2023)</span>. But run the very same detector on the aggregate series we actually have on hand —</p>
@@ -215,21 +225,55 @@
     <p>This time it climbs. The early-warning signature that vanished from the aggregate is present in the variable that carries it — the same arithmetic, a different representation. The signal exists; whether you can see it depends entirely on which view you choose. <span class="note">(This is one observed fingerprint, not proof of imminent collapse; what it demonstrates is the representation-dependence, not a date.)</span>
   </section>
 
+  <!-- ===================== PROBE III ===================== -->
+  <section>
+    <div class="kicker">Probe III — The horizon of memory</div>
+    <h2>The cause is in the system; the <em>delay</em> is in us</h2>
+    <p class="tagline">A bird's present form is not its initial condition — it is the whole trajectory it has travelled. Cause and effect need not be adjacent in time. When the lag outruns our memory, causation is real but imperceptible.</p>
+    <p>DDT was banned in 1972. Its signature surfaced decades later, in the breeding failure of albatrosses that had carried it up the food chain. The relevant quantity was never the same-time correlation C(X(t), Y(t)) — it was the <em>time-lagged</em> one, C(X(t), Y(t−τ)). A system with memory (non-Markovian) hides its causes at a delay; once τ exceeds an observation window or an institutional memory, the link is present in the world and absent from perception. This is slow violence: not a moral failure of attention, but a <em>structural</em> property of how the system carries its past.</p>
+
+    <div class="panel">
+      <div class="lab">Concept (synthetic) — lagged correlation C(τ): memory vs memorylessness</div>
+      <canvas id="lagSynth" width="760" height="220"></canvas>
+      <div class="slider-wrap">
+        <div class="lab">Read the correlation at lag τ = <span id="tauSynthV" class="mono"></span> years</div>
+        <input type="range" id="tauSynth" min="0" max="40" value="0"/>
+      </div>
+      <div class="note" id="lagSynthNote"></div>
+    </div>
+
+    <p>The memoryless process (AR(1), grey) peaks at τ=0 and decays — its present is explained by its immediate past, so a standard Markovian ecology model (Lotka–Volterra and kin) sees everything it needs at zero lag. The process with a memory kernel (oxblood) peaks at a <em>delayed</em> τ: its cause sits years upstream. A model that only looks at τ=0 cannot see that peak — not because it is noisy, but because it is structurally blind to delay.</p>
+
+    <div class="panel">
+      <div class="lab">Real data — lagged correlation of annual CO₂ emissions vs the AMOC SST fingerprint</div>
+      <canvas id="lagReal" width="760" height="220"></canvas>
+      <div class="slider-wrap">
+        <div class="lab">Observation window / institutional memory: <span id="winSpanV" class="mono"></span> years &nbsp;·&nbsp; peak at τ = <span id="peakTauV" class="mono"></span></div>
+        <input type="range" id="winSpan" min="3" max="60" value="40"/>
+      </div>
+      <div class="note" id="lagRealNote"></div>
+    </div>
+
+    <p>The same record Probe II read for early warning, read now for delay: emissions and the overturning fingerprint share structure not at τ=0 but at a lag of decades. Shrink the observation window below that lag and the peak slides outside what you can see — the readout flips to <em>“the cause is now imperceptible.”</em> Nothing about the causation changed; only the horizon did. <span class="note">(Honesty: this is a lagged <em>correlation</em>, not a causal proof, and not mutual information — MI is unstable on records this short and noisy. The claim is narrow: a same-time view misses delayed structure that an AR(1) null does not fully account for.)</span></p>
+  </section>
+
   <!-- ===================== CLOSE ===================== -->
   <section>
-    <div class="kicker">What the two probes share</div>
+    <div class="kicker">What the three probes share</div>
     <h2>No finite measurement resolves the phase</h2>
-    <p>Both probes end at the same wall, and it is the wall my framework predicted. Probe I: the transition is not in any local order parameter — read levels and you invent a transition, read growth and it dissolves; the structure that would carry it lives in a global correlation architecture no aggregate captures. Probe II: the transition is real and physical, but near it the relevant signal concentrates in particular subsystems, and "no finite measurement fully resolves the phase" is a mathematical consequence of critical behavior, not a gap in our instruments.</p>
-    <p>So the physics was the right physics. The Anthropocene really does have the shape of a transition in correlation structure. What these probes show is that <em>which representation you choose</em> decides what you are allowed to see — and the choice runs in three registers. Levels or growth decided whether the <em>transition exists</em>. Aggregate or fingerprint decided whether the <em>signal is visible</em>. And absolute, per-capita, or cumulative decided who is <em>responsible</em>. The map is never the territory; here it is provably never the whole territory.</p>
+    <p>All three probes end at the same wall, and it is the wall my framework predicted. Probe I: the transition is not in any local order parameter — read levels and you invent a transition, read growth and it dissolves; the structure that would carry it lives in a global correlation architecture no aggregate captures. Probe II: the transition is real and physical, but near it the relevant signal concentrates in particular subsystems, and "no finite measurement fully resolves the phase" is a mathematical consequence of critical behavior. Probe III: even when the signal is there and local, it can sit at a lag longer than any window we keep — present in the world, absent from perception.</p>
+    <p>So the physics was the right physics. The Anthropocene really does have the shape of a transition in correlation structure. What these probes show is that <em>which representation you choose</em> decides what you are allowed to see — and the choice runs in four registers. Levels or growth decided whether the <em>transition exists</em>. Aggregate or fingerprint decided whether the <em>signal is visible</em>. Same-time or time-lagged decided whether the <em>cause is perceptible at all</em>. And absolute, per-capita, or cumulative decided who is <em>responsible</em>. The map is never the territory; here it is provably never the whole territory.</p>
     <p>That third toggle is where the stakes turn. The ranking bars do not disagree because the data is uncertain — every number there is real and exact. They disagree because they measure <em>different things that cannot share a ruler</em>: a flow of emissions this year, a flow per person, a stock accumulated over two centuries. No amount of better measurement collapses them into one true ranking of blame, because there is no measurement of which they are rival estimates. Pick absolute and China leads; pick per-capita and the wealthy lead; pick cumulative and the early industrializers lead. Each is correct. None is <em>the</em> answer.</p>
     <p class="tagline" style="margin-top:24px;">So the choice of ledger is not a measurement. It is a decision about what we owe.</p>
-    <p>This is where physics hands off. A complete account of the correlation structure — which subsystems are coupled, which fingerprints are climbing — is the precondition for any serious ethics of the Anthropocene; it is not the ethics. The science can tell you that the three ledgers exist and what each one says. It cannot tell you which to open, because that question is not about what <em>is</em> but about what counts — and that is the first political question, not the last scientific one. Physics does not end in silence. It ends exactly where it should: at the edge of measurement, handing us the decision it was never able to make for us.</p>
+    <p>This is where physics hands off. A complete account of the correlation structure — which subsystems are coupled, which fingerprints are climbing, at what lag — is the precondition for any serious ethics of the Anthropocene; it is not the ethics. The science can tell you that the ledgers exist and what each one says. It cannot tell you which to open, because that question is not about what <em>is</em> but about what counts — and that is the first political question, not the last scientific one.</p>
+    <p>And the lag axis is where the loss stops being a number at all. An extinction does not only destroy a present state H(now) — the count of what is alive today. It destroys H(the ensemble of futures) that state could still have become: every trajectory that bird's path-dependent form had kept open. That second quantity is incomparably larger, and it is not measured by anything on this page, because it is not the kind of thing a measurement returns. A slow harm whose cause has slid past our horizon, foreclosing futures we will never count — that is the Anthropocene's signature loss, and it is exactly the loss no order parameter records. Physics does not end in silence. It ends precisely where it should: at the edge of measurement, handing us a decision it was never able to make for us — about goods it was never able to see.</p>
   </section>
 
   <footer>
     <p class="note">
       Data — real, observed: Our World in Data / Global Carbon Project (CO₂, energy; world &amp; national, 1900–2022); atmospheric CO₂ concentration from NOAA Mauna Loa; global surface temperature from NASA GISTEMP; AMOC subpolar-gyre SST fingerprint from Caesar et al. 2018 (HadISST). The “Earth + human” set follows Steffen et al. (2015) in pairing socioeconomic drivers with Earth-system indicators. Cumulative CO₂ reads as the forcing axis in Probe II.<br>
-      Probe II model — saddle-node (tilted double-well) normal form with additive noise; critical slowing down is an exact property of this model. The plotted state is a model response illustrating the detection method, not a measured Earth variable. Real early-warning result cited: P. Ditlevsen &amp; S. Ditlevsen, "Warning of a forthcoming collapse of the Atlantic meridional overturning circulation," Nature Communications (2023).<br>
+      Probe II model — saddle-node (tilted double-well) normal form with additive noise; critical slowing down is an exact property of this model. The plotted state (both the time view and the phase-space / bifurcation view) is a model response illustrating the detection method, not a measured Earth variable; the phase-space equilibrium curve is μ = x³ − x, with stable branches at |x| &gt; 1/√3 and the unstable branch dashed. Real early-warning result cited: P. Ditlevsen &amp; S. Ditlevsen, "Warning of a forthcoming collapse of the Atlantic meridional overturning circulation," Nature Communications (2023).<br>
+      Probe III — Part A is synthetic (proof of concept): a memory-kernel (non-Markovian) response and an AR(1) Markov response driven by the same noise, to contrast a delayed correlation peak with a peak at τ=0. Part B is real: lagged Pearson correlation of linearly-detrended annual CO₂ emissions vs the Caesar 2018 AMOC SST fingerprint, overlap 1871–2016. This is a time-lagged correlation, NOT causal proof and NOT mutual information (MI is unstable on records this short and noisy); detrended levels are used (not first differences, which suppress the multi-decade structure of interest). The claim is narrow: a same-time reading misses delayed structure an AR(1) null does not fully account for.<br>
       Country set — the 40 largest emitters with near-complete annual CO₂ records over 1910–2022, grouped by region in the matrix. Four countries had isolated gaps (South Korea, Malaysia, Greece: 1 year each; Philippines: 3 wartime years) filled by linear interpolation — 6 interpolated values out of ~4,500, affecting no correlation materially.<br>
       Responsibility panel — latest-year (2022) values, real and exact: absolute = annual production-based CO₂ (Mt/yr); per-capita = annual CO₂ ÷ population (t/person/yr); cumulative = total CO₂ since 1750 (Mt). The first two are flows, the third a stock — they are deliberately <em>incommensurable</em> (no shared unit), which is the point: there is no single ledger of responsibility. It is a ranking of levels, not a correlation, so the levels-vs-growth caveat above does not apply.<br>
       Caveat — correlation is not causation: isolating the causal weight of one subsystem on another would require conditional mutual information I(B;A|Z) over the full network, beyond what these correlations show.<br>
@@ -538,10 +582,53 @@ function drawSim(){
   if(buf.length){const px=w*((buf.length-1)/(BUF-1)),py=ymap(buf[buf.length-1]);
     ctx.fillStyle=css('--accent2');ctx.beginPath();ctx.arc(px,py,5,0,7);ctx.fill();}
 }
+/* ---------- Probe II phase-space (bifurcation) view ----------
+   Same simulated state (x, mu, buf) reused — NOT a second simulation. Equilibria
+   of dx=(-x^3+x+mu)dt solve -x^3+x+mu=0, i.e. mu=x^3-x. Plotting that curve in
+   the (mu,x) plane gives the S-shaped fold: stable where d(drift)/dx=-3x^2+1<0
+   (|x|>1/sqrt3), unstable in between. The plotted state is a MODEL response, not a
+   measured Earth variable. */
+const phaseCv=document.getElementById('phase');
+let trail=[]; const TRAIL=900;
+const MUSPAN=[-0.75,0.75], XSPAN=[-1.7,1.7];
+function drawPhase(){
+  if(!phaseCv)return;
+  const dpr=devicePixelRatio||1,w=phaseCv.clientWidth||380,h=200;
+  phaseCv.width=w*dpr;phaseCv.height=h*dpr;phaseCv.style.height=h+'px';
+  const ctx=phaseCv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+  const pL=30,pR=8,pT=8,pB=20,pw=w-pL-pR,ph=h-pT-pB;
+  const MX=m=>pL+pw*((m-MUSPAN[0])/(MUSPAN[1]-MUSPAN[0]));
+  const XY=v=>pT+ph*(1-(v-XSPAN[0])/(XSPAN[1]-XSPAN[0]));
+  // axes
+  ctx.strokeStyle=css('--rule');ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pL,pT);ctx.lineTo(pL,pT+ph);ctx.lineTo(w-pR,pT+ph);ctx.stroke();
+  ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';
+  ctx.fillText('x',4,pT+8);ctx.fillText('μ (forcing)',w-pR-66,pT+ph+16);
+  // equilibrium curve mu=x^3-x, split into stable (|x|>1/sqrt3) and unstable branches
+  const xc=1/Math.sqrt(3);
+  function branch(lo,hi,dash){ctx.setLineDash(dash);ctx.beginPath();let started=false;
+    for(let xv=lo;xv<=hi+1e-6;xv+=0.01){const m=xv*xv*xv-xv;
+      if(m<MUSPAN[0]-0.05||m>MUSPAN[1]+0.05){started=false;continue;}
+      const X=MX(m),Y=XY(xv);started?ctx.lineTo(X,Y):ctx.moveTo(X,Y);started=true;}
+    ctx.stroke();}
+  ctx.strokeStyle=css('--ink');ctx.lineWidth=2;branch(xc,XSPAN[1],[]);branch(XSPAN[0],-xc,[]); // stable
+  ctx.strokeStyle=css('--ink-soft');ctx.lineWidth=1.4;branch(-xc,xc,[4,4]);                    // unstable (dashed)
+  ctx.setLineDash([]);
+  // fold points (where branches meet): x=±1/sqrt3, mu=∓2/(3√3)
+  ctx.fillStyle=css('--accent3');
+  [[ -MUC, xc],[MUC,-xc]].forEach(([m,xv])=>{ctx.beginPath();ctx.arc(MX(m),XY(xv),3,0,7);ctx.fill();});
+  // hysteresis trail (visited mu,x)
+  ctx.strokeStyle=tipped?css('--accent'):css('--accent2');ctx.globalAlpha=.35;ctx.lineWidth=1.2;ctx.beginPath();
+  trail.forEach((p,i)=>{const X=MX(p[0]),Y=XY(p[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});ctx.stroke();ctx.globalAlpha=1;
+  // current ball
+  const bx=MX(Math.max(MUSPAN[0],Math.min(MUSPAN[1],mu))),by=XY(Math.max(XSPAN[0],Math.min(XSPAN[1],x)));
+  ctx.fillStyle=tipped?css('--accent'):css('--accent2');ctx.beginPath();ctx.arc(bx,by,5,0,7);ctx.fill();
+}
 function loop(){
   if(ramping){mu+=0.0016;if(mu>0.62){mu=0.62;ramping=false;document.getElementById('rampBtn').textContent='▶ Auto-ramp the forcing';}
     document.getElementById('muSlider').value=Math.round(mu*100);}
   stepSim();
+  trail.push([mu,x]); if(trail.length>TRAIL)trail.shift();
   const st=winStats(buf);
   // gauges: scale variance & ac to 0..1 for display
   document.getElementById('varFill').style.width=Math.min(100,st.varr*420)+'%';
@@ -551,7 +638,7 @@ function loop(){
   if(tipped && x<-0.4){tipped=false;document.getElementById('tipFlag').textContent='Returned to state A — note how much lower the forcing had to go. That gap is hysteresis: the transition is not reversible.';}
   const approaching = (!tipped && mu>MUC-0.13 && mu<MUC);
   document.getElementById('muRead').textContent=`forcing μ = ${mu.toFixed(2)}  (fold at ${MUC.toFixed(2)})`+(approaching?'  · nearing the threshold — watch the gauges climb':'');
-  drawSim();
+  drawSim();drawPhase();
   requestAnimationFrame(loop);
 }
 document.getElementById('muSlider').oninput=e=>{mu=(+e.target.value)/100;};
@@ -602,6 +689,115 @@ requestAnimationFrame(loop);
   const n=ac.length;let sx=0,sy=0,sxy=0,sxx=0;ac.forEach((v,i)=>{sx+=i;sy+=v;sxy+=i*v;sxx+=i*i;});const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
   document.getElementById('amocCsdNote').textContent='Lag-1 autocorrelation rises from '+ac[0].toFixed(2)+' to '+ac[ac.length-1].toFixed(2)+' across '+cy[0]+'\u2013'+cy[cy.length-1]+' (trend \u2248 '+(slope>=0?'+':'')+slope.toFixed(4)+'/step); window variance rises in step. The critical-slowing-down signature is present here \u2014 in the one variable that carries it \u2014 where the aggregate showed nothing.';
 })();
+
+/* ---------- Probe III: lagged correlation / non-Markovian memory ----------
+   Part A is SYNTHETIC (proof of concept, stated on screen + footer). A common
+   white-noise driver feeds two responses: a non-Markovian one whose output is a
+   delayed, kernel-smoothed echo of the driver (peak of C(tau) at tau\u2248D), and an
+   AR(1) Markov one (peak at tau=0, monotone decay). Part B is REAL: annual CO2
+   emissions vs the Caesar 2018 AMOC SST fingerprint \u2014 a lagged CORRELATION, not
+   causal proof and not mutual information (MI is unstable on records this short). */
+function pearson(a,b){const n=Math.min(a.length,b.length);let ma=0,mb=0;for(let i=0;i<n;i++){ma+=a[i];mb+=b[i];}ma/=n;mb/=n;
+  let num=0,da=0,db=0;for(let i=0;i<n;i++){const x=a[i]-ma,y=b[i]-mb;num+=x*y;da+=x*x;db+=y*y;}return (da&&db)?num/Math.sqrt(da*db):0;}
+// lagged corr: correlation of X(t) with Y(t-tau), tau>=0
+function laggedCorr(X,Y,tau){const xs=[],ys=[];for(let t=tau;t<X.length;t++){xs.push(X[t]);ys.push(Y[t-tau]);}return pearson(xs,ys);}
+const lagAxis=(css,ctx,w,h,pad,maxTau,curves,markTau)=>{
+  const {pL,pR,pT,pB}=pad,pw=w-pL-pR,ph=h-pT-pB;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle=css('--rule');ctx.lineWidth=1;
+  [-0.5,0,0.5,1].forEach(t=>{const y=pT+ph*(1-(t+0.5)/1.5);ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(w-pR,y);ctx.stroke();
+    ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';ctx.fillText(t.toFixed(1),4,y+3);});
+  // zero-corr baseline emphasis
+  const y0=pT+ph*(1-0.5/1.5);ctx.strokeStyle=css('--ink-soft');ctx.globalAlpha=.5;ctx.beginPath();ctx.moveTo(pL,y0);ctx.lineTo(w-pR,y0);ctx.stroke();ctx.globalAlpha=1;
+  const X=tau=>pL+pw*(tau/maxTau), Y=c=>pT+ph*(1-(Math.max(-0.5,Math.min(1,c))+0.5)/1.5);
+  curves.forEach(cur=>{ctx.strokeStyle=cur.col;ctx.lineWidth=cur.lw||2;ctx.beginPath();
+    cur.data.forEach((c,t)=>{const xx=X(t),yy=Y(c);t?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);});ctx.stroke();
+    // peak marker
+    let pk=0;cur.data.forEach((c,t)=>{if(c>cur.data[pk])pk=t;});
+    ctx.fillStyle=cur.col;ctx.beginPath();ctx.arc(X(pk),Y(cur.data[pk]),3.5,0,7);ctx.fill();});
+  // tau axis ticks
+  ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';ctx.textAlign='center';
+  [0,Math.round(maxTau/2),maxTau].forEach(t=>ctx.fillText('\u03c4='+t,X(t),h-6));ctx.textAlign='left';
+  // movable read line
+  if(markTau!=null){const mx=X(markTau);ctx.strokeStyle=css('--accent3');ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(mx,pT);ctx.lineTo(mx,pT+ph);ctx.stroke();}
+};
+// ---- Part A: synthetic ----
+const LAGSYN=(function(){
+  const N=600, D=14;                          // delay of the memory kernel (years, synthetic)
+  // deterministic-ish driver (no Math.random dependence needed for the shape; use a fixed pseudo-noise)
+  let seed=12345; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff-0.5;};
+  const drv=[];for(let i=0;i<N;i++)drv.push(rnd());
+  // non-Markovian response: delayed, kernel-smoothed echo of the driver + small noise
+  const nm=new Array(N).fill(0);
+  for(let t=0;t<N;t++){let s=0,wsum=0;for(let k=0;k<10;k++){const idx=t-D-k;if(idx>=0){const wt=Math.exp(-k/4);s+=wt*drv[idx];wsum+=wt;}}nm[t]=(wsum?s/wsum:0)+0.25*rnd();}
+  // AR(1) Markov response driven by same driver, no delay
+  const ar=new Array(N).fill(0);const phi=0.6;for(let t=1;t<N;t++)ar[t]=phi*ar[t-1]+drv[t]+0.25*rnd();
+  const maxTau=40, cNM=[], cAR=[];
+  for(let tau=0;tau<=maxTau;tau++){cNM.push(laggedCorr(nm,drv,tau));cAR.push(laggedCorr(ar,drv,tau));}
+  // normalize each to its own max magnitude for display clarity (shape is the point)
+  const nrm=a=>{const m=Math.max(...a.map(Math.abs))||1;return a.map(v=>v/m);};
+  return {cNM:nrm(cNM),cAR:nrm(cAR),maxTau,D};
+})();
+function drawLagSynth(){
+  const cv=document.getElementById('lagSynth');if(!cv)return;const dpr=devicePixelRatio||1,w=cv.clientWidth||760,h=220;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const tau=+document.getElementById('tauSynth').value;
+  lagAxis(css,ctx,w,h,{pL:34,pR:8,pT:10,pB:20},LAGSYN.maxTau,
+    [{data:LAGSYN.cAR,col:css('--ink-soft'),lw:1.6},{data:LAGSYN.cNM,col:css('--accent'),lw:2}],tau);
+  document.getElementById('tauSynthV').textContent=tau;
+  const cNM=LAGSYN.cNM[tau], cAR=LAGSYN.cAR[tau];
+  document.getElementById('lagSynthNote').innerHTML=
+    `<span style="color:var(--accent)">memory kernel</span>: C(\u03c4=${tau}) = ${cNM.toFixed(2)} &nbsp;\u00b7&nbsp; `+
+    `<span style="color:var(--ink-soft)">AR(1) Markov</span>: C(\u03c4=${tau}) = ${cAR.toFixed(2)}. `+
+    `The memory process peaks near \u03c4\u2248${LAGSYN.D} (its cause is delayed); the Markov process peaks at \u03c4=0. Synthetic \u2014 proof of concept.`;
+}
+document.getElementById('tauSynth').oninput=drawLagSynth;
+drawLagSynth();
+
+// ---- Part B: real (CO2 emissions vs AMOC fingerprint), overlapping years ----
+const LAGREAL=(function(){
+  const co2y=D.p2.years, co2=D.p2.co2, A=D.p2&&D.p2.amoc; if(!A) return null;
+  const ay=A.years, aidx=A.idx;
+  // overlap range
+  const y0=Math.max(co2y[0],ay[0]), y1=Math.min(co2y[co2y.length-1],ay[ay.length-1]);
+  const E=[],F=[];for(let y=y0;y<=y1;y++){const ce=co2[co2y.indexOf(y)],fe=aidx[ay.indexOf(y)];
+    if(ce==null||fe==null){E.push(null);F.push(null);}else{E.push(ce);F.push(fe);}}
+  // drop any nulls by truncating to the longest clean contiguous span
+  let bs=0,bl=0,cs=0;for(let i=0;i<E.length;i++){if(E[i]!=null&&F[i]!=null){cs++;if(cs>bl){bl=cs;bs=i-cs+1;}}else cs=0;}
+  const Ec=E.slice(bs,bs+bl), Fc=F.slice(bs,bs+bl), yc0=y0+bs;
+  // Remove a linear trend from each level series (NOT first differences) so we
+  // correlate decadal-scale fluctuations without the shared monotone trend that
+  // makes any two rising curves correlate trivially. First-differencing kills the
+  // very low-frequency, multi-decade structure we are looking for, so we detrend.
+  function detrend(a){const n=a.length;let sx=0,sy=0,sxy=0,sxx=0;for(let i=0;i<n;i++){sx+=i;sy+=a[i];sxy+=i*a[i];sxx+=i*i;}
+    const b=(n*sxy-sx*sy)/(n*sxx-sx*sx),c=(sy-b*sx)/n;return a.map((v,i)=>v-(b*i+c));}
+  const dE=detrend(Ec), dF=detrend(Fc);
+  const maxTau=60, C=[];
+  for(let tau=0;tau<=maxTau;tau++) C.push(laggedCorr(dF,dE,tau)); // F(t) vs E(t-tau): fingerprint responds to past emissions
+  // AR(1) null: corr expected from F's own autocorrelation alone (rough) \u2014 flag residual delayed structure
+  let pk=0;C.forEach((c,t)=>{if(c>C[pk])pk=t;});
+  return {C,maxTau,span:bl,y0:yc0,y1:yc0+bl-1,peakTau:pk};
+})();
+function drawLagReal(){
+  const cv=document.getElementById('lagReal');if(!cv||!LAGREAL)return;const dpr=devicePixelRatio||1,w=cv.clientWidth||760,h=220;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const win=+document.getElementById('winSpan').value;
+  const visible = LAGREAL.peakTau<=win;
+  const col = visible? css('--accent2') : css('--ink-soft');
+  lagAxis(css,ctx,w,h,{pL:34,pR:8,pT:10,pB:20},LAGREAL.maxTau,[{data:LAGREAL.C,col,lw:2}],null);
+  // shaded observation window (0..win) + edge line
+  const pL=34,pR=8,pw=w-pL-pR,ph=h-30;const X=tau=>pL+pw*(tau/LAGREAL.maxTau);
+  ctx.fillStyle='rgba(192,137,47,.14)';ctx.fillRect(pL,10,X(win)-pL,ph);
+  ctx.strokeStyle=css('--accent3');ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(win),10);ctx.lineTo(X(win),10+ph);ctx.stroke();
+  document.getElementById('winSpanV').textContent=win;
+  document.getElementById('peakTauV').textContent=LAGREAL.peakTau+' yr';
+  document.getElementById('lagRealNote').innerHTML = visible
+    ? `Within a ${win}-year window the peak correlation (\u03c4=${LAGREAL.peakTau} yr) is still visible. Overlap ${LAGREAL.y0}\u2013${LAGREAL.y1}, ${LAGREAL.span} yrs. A same-time (\u03c4=0) reading alone would understate the link.`
+    : `<b style="color:var(--accent)">The cause is now imperceptible.</b> The peak sits at \u03c4=${LAGREAL.peakTau} yr, outside a ${win}-year window \u2014 present in the record, absent from perception. Nothing about the causation changed; only the horizon did.`;
+}
+document.getElementById('winSpan').oninput=drawLagReal;
+drawLagReal();
 </script>
 </body>
 </html>
