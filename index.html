@@ -33,6 +33,9 @@
   .byline{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.05em;color:var(--ink-soft);margin-top:24px;}
   .note{font-family:"Space Mono",monospace;font-size:11.5px;letter-spacing:.02em;color:var(--ink-soft);line-height:1.65;}
   .tagline{font-family:"Fraunces",serif;font-style:italic;font-size:clamp(20px,3.6vw,27px);line-height:1.25;margin:0 0 14px;}
+  .probe-meta{font-family:"Space Mono",monospace;font-size:11.5px;letter-spacing:.02em;color:var(--ink-soft);line-height:1.7;margin:0 0 4px;}
+  .probe-meta b{color:var(--accent);font-weight:700;}
+  .probe-src{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.01em;color:var(--ink-soft);line-height:1.65;margin:0 0 16px;border-left:2px solid var(--rule);padding-left:12px;}
   .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0;}
   .seg{display:inline-flex;border:1px solid var(--ink);border-radius:999px;overflow:hidden;}
   .seg button{font-family:"Space Mono",monospace;font-size:12px;padding:8px 14px;background:transparent;color:var(--ink);border:none;cursor:pointer;transition:all .15s;}
@@ -105,7 +108,8 @@
     <div class="kicker">Anthropocene Humanities · Final Project · A computational essay</div>
     <h1>A phase transition<br>you cannot quite <em>measure</em></h1>
     <p class="lede">If the Anthropocene is a phase transition in the Earth system, can we actually see it in the data? This is an honest attempt — and an account of the wall it hits.</p>
-    <p class="dropcap" style="margin-top:20px;">Physics gives the Anthropocene a tempting shape: a system pushed across a threshold into a qualitatively new regime. I wanted to test that, not assert it — to take the metaphor seriously enough to let real data refuse it. What follows are three probes, all run on observed records (CO₂, energy, economy, 1850–2022), and a conclusion none of them lets me escape.</p>
+    <p class="dropcap" style="margin-top:20px;">Physics gives the Anthropocene a tempting shape: a system pushed across a threshold into a qualitatively new regime. I wanted to test that, not assert it — to take the metaphor seriously enough to let real data refuse it. What follows are four probes, all run on observed records (CO₂, energy, economy, 1850–2022), and a conclusion none of them lets me escape.</p>
+    <p>Change one setting and the world's worst polluter shifts from China to the Gulf to the US — and choosing which setting is true is not a measurement but a moral act. That is where this essay arrives.</p>
     <div class="byline">Junwoo Jung · KAIST Physics · interactive</div>
   </section>
 
@@ -114,6 +118,8 @@
     <div class="kicker">Probe I — Correlation structure</div>
     <h2>The transition the <em>scale invents</em></h2>
     <p class="tagline">A phase transition shows up not in any single variable, but in how variables become correlated. So: did the world's subsystems lock into one correlated whole?</p>
+    <p class="probe-meta"><b>Lens</b> correlation structure · <b>Move</b> levels → growth · <b>Finding</b> the clean transition was an artifact of scale</p>
+    <p class="probe-src"><b>Data:</b> Our World in Data / Global Carbon Project — 9 world indicators and 40 countries, 1850–2022. &nbsp;<b>Why:</b> a phase transition lives in how variables co-move, not in any one of them — so we need many coupled series, not a single index.</p>
     <p>The standard story dates the Anthropocene to a "Great Acceleration" after 1950 — the moment human and Earth systems supposedly fused into a single, synchronized regime. If that fusion is real, it should be legible as correlation. So let us look. Below, the cross-correlation structure of real global series. The <span class="pill">levels</span> view correlates the raw rising curves; the <span class="pill">growth</span> view correlates their year-to-year changes. One of these tells a clean story of a synchronized planet. The other tells the truth.</p>
 
     <div class="panel wide">
@@ -155,20 +161,6 @@
       </div>
 
       <div class="caption"><span class="ct" id="p1cap"></span><span class="note" id="p1note"></span></div>
-
-      <div id="rankPanel" class="hidden">
-        <div class="rank-head">
-          <div class="lab" style="margin:0;">A different question, same forty countries — <span style="color:var(--accent)">who is responsible?</span></div>
-          <div class="seg" id="rankSeg">
-            <button data-rank="abs" class="active">Absolute</button>
-            <button data-rank="pc">Per capita</button>
-            <button data-rank="cum">Cumulative</button>
-          </div>
-        </div>
-        <p class="note" style="margin:10px 0 0;">Production-based accounting books a country as the emitter at the smokestack — not the consumer of what the smoke made. Which ledger you open decides who appears guilty.</p>
-        <div id="rankBars"></div>
-        <div class="caption" id="rankCap"><span class="ct" id="rankCapT"></span><span class="note" id="rankCapN"></span></div>
-      </div>
     </div>
 
     <p>Switch to <b>growth rates</b> and the blaze of red collapses. The "one synchronized system" was an artifact: any set of monotonically rising curves correlates near 1, whether or not anything is coupled. What survives honest detrending is not a clean 1950 transition but episodic synchrony — wars, oil shocks, 2008, the pandemic — shared shocks, not a phase change. The clean transition lived in the <em>choice of representation</em>, not in the world.</p>
@@ -179,6 +171,8 @@
     <div class="kicker">Probe II — Critical slowing down</div>
     <h2>The transition the data can <em>barely see</em></h2>
     <p class="tagline">A real phase transition leaves a fingerprint before it happens: as a system nears a tipping point, it recovers from perturbations ever more slowly. Variance rises. Memory lengthens.</p>
+    <p class="probe-meta"><b>Lens</b> critical slowing down · <b>Move</b> aggregate → AMOC fingerprint · <b>Finding</b> the warning is real but washes out of the average</p>
+    <p class="probe-src"><b>Model:</b> saddle-node normal form (critical slowing down is an exact property of it). &nbsp;<b>Real data:</b> AMOC subpolar-gyre SST fingerprint (HadISST; Caesar et al. 2018; early-warning result Ditlevsen &amp; Ditlevsen 2023). &nbsp;<b>Why:</b> to ask whether a tipping fingerprint is visible we need both the exact theoretical signal and the one real subsystem known to carry it.</p>
     <p>This is exact physics, not analogy. Here is a system in a potential well, pushed by a rising forcing — read the forcing axis as cumulative CO₂. Drag it, or let it ramp. Watch the early-warning signals climb <em>before</em> the system tips — and watch that the tip does not reverse when you pull back.</p>
 
     <div class="panel">
@@ -230,6 +224,8 @@
     <div class="kicker">Probe III — The horizon of memory</div>
     <h2>The cause is in the system; the <em>delay</em> is in us</h2>
     <p class="tagline">A bird's present form is not its initial condition — it is the whole trajectory it has travelled. Cause and effect need not be adjacent in time. When the lag outruns our memory, causation is real but imperceptible.</p>
+    <p class="probe-meta"><b>Lens</b> time-lagged correlation · <b>Move</b> shrink the observation window · <b>Finding</b> a real cause slides past our horizon</p>
+    <p class="probe-src"><b>Data:</b> annual CO₂ emissions vs the AMOC SST fingerprint (Caesar 2018), time-lagged correlation, 1871–2016, with an AR(1) surrogate band. &nbsp;<b>Why:</b> to show a cause can outrun perception we need a real pair whose link lives at a multi-decade lag, not at τ=0.</p>
     <p>DDT was banned in 1972. Its signature surfaced decades later, in the breeding failure of albatrosses that had carried it up the food chain. The relevant quantity was never the same-time correlation C(X(t), Y(t)) — it was the <em>time-lagged</em> one, C(X(t), Y(t−τ)). A system with memory (non-Markovian) hides its causes at a delay; once τ exceeds an observation window or an institutional memory, the link is present in the world and absent from perception. This is slow violence: not a moral failure of attention, but a <em>structural</em> property of how the system carries its past.</p>
 
     <div class="panel">
@@ -257,13 +253,41 @@
     <p>The same record Probe II read for early warning, read now for delay: emissions and the overturning fingerprint share structure not at τ=0 but at a lag of decades. Shrink the observation window below that lag and the peak slides outside what you can see — the readout flips to <em>“the cause is now imperceptible.”</em> Nothing about the causation changed; only the horizon did. <span class="note">(Honesty: this is a lagged <em>correlation</em>, not a causal proof, and not mutual information — MI is unstable on records this short and noisy. The claim is narrow: a same-time view misses delayed structure that an AR(1) null does not fully account for.)</span></p>
   </section>
 
+  <!-- ===================== PROBE IV ===================== -->
+  <section>
+    <div class="kicker">Probe IV — Incommensurable ledgers</div>
+    <h2>The villain the <em>ledger chooses</em></h2>
+    <p class="tagline">Same emissions, three rulers that cannot share a unit. Who is responsible is not measured — it is decided.</p>
+    <p class="probe-meta"><b>Lens</b> emissions accounting · <b>Move</b> absolute → per-capita → cumulative · <b>Finding</b> no ledger ranks blame truly — the choice is a decision, not a measurement</p>
+    <p class="probe-src"><b>Data:</b> 2022 production-based CO₂ — absolute (Mt/yr), per-capita (t/person), cumulative since 1750 (Mt). OWID / Global Carbon Project. &nbsp;<b>Why:</b> these three are deliberately incommensurable — a flow, a flow-per-person, and a stock — so no single ledger can rank blame.</p>
+    <p>The first three probes asked what the data lets us <em>see</em>. This one asks what it lets us <em>say about each other</em>. Take the same forty countries, the same real emissions, and rank them — but switch the ruler. Each ranking is exact; each names a different villain.</p>
+
+    <div class="panel">
+      <div id="rankPanel">
+        <div class="rank-head">
+          <div class="lab" style="margin:0;">Same forty countries — <span style="color:var(--accent)">who is responsible?</span></div>
+          <div class="seg" id="rankSeg">
+            <button data-rank="abs" class="active">Absolute</button>
+            <button data-rank="pc">Per capita</button>
+            <button data-rank="cum">Cumulative</button>
+          </div>
+        </div>
+        <p class="note" style="margin:10px 0 0;">Production-based accounting books a country as the emitter at the smokestack — not the consumer of what the smoke made. Which ledger you open decides who appears guilty.</p>
+        <div id="rankBars"></div>
+        <div class="caption" id="rankCap"><span class="ct" id="rankCapT"></span><span class="note" id="rankCapN"></span></div>
+      </div>
+    </div>
+
+    <p>Nothing here is uncertain — every number is real and exact. The rankings disagree because the three measures are <em>incommensurable</em>: a flow this year, a flow per person, a stock accumulated over two centuries. There is no measurement of which they are rival estimates, so no better instrument collapses them into one true order of blame. Pick the ruler and you have picked the villain.</p>
+  </section>
+
   <!-- ===================== CLOSE ===================== -->
   <section>
-    <div class="kicker">What the three probes share</div>
+    <div class="kicker">What the four probes share</div>
     <h2>No finite measurement resolves the phase</h2>
-    <p>All three probes end at the same wall, and it is the wall my framework predicted. Probe I: the transition is not in any local order parameter — read levels and you invent a transition, read growth and it dissolves; the structure that would carry it lives in a global correlation architecture no aggregate captures. Probe II: the transition is real and physical, but near it the relevant signal concentrates in particular subsystems, and "no finite measurement fully resolves the phase" is a mathematical consequence of critical behavior. Probe III: even when the signal is there and local, it can sit at a lag longer than any window we keep — present in the world, absent from perception.</p>
-    <p>So the physics was the right physics. The Anthropocene really does have the shape of a transition in correlation structure. What these probes show is that <em>which representation you choose</em> decides what you are allowed to see — and the choice runs in four registers. Levels or growth decided whether the <em>transition exists</em>. Aggregate or fingerprint decided whether the <em>signal is visible</em>. Same-time or time-lagged decided whether the <em>cause is perceptible at all</em>. And absolute, per-capita, or cumulative decided who is <em>responsible</em>. The map is never the territory; here it is provably never the whole territory.</p>
-    <p>That third toggle is where the stakes turn. The ranking bars do not disagree because the data is uncertain — every number there is real and exact. They disagree because they measure <em>different things that cannot share a ruler</em>: a flow of emissions this year, a flow per person, a stock accumulated over two centuries. No amount of better measurement collapses them into one true ranking of blame, because there is no measurement of which they are rival estimates. Pick absolute and China leads; pick per-capita and the wealthy lead; pick cumulative and the early industrializers lead. Each is correct. None is <em>the</em> answer.</p>
+    <p>The first three probes end at the same wall, and it is the wall my framework predicted. Probe I (<em>existence</em>): the transition is not in any local order parameter — read levels and you invent a transition, read growth and it dissolves; the structure that would carry it lives in a global correlation architecture no aggregate captures. Probe II (<em>visibility</em>): the transition is real and physical, but near it the relevant signal concentrates in particular subsystems, and "no finite measurement fully resolves the phase" is a mathematical consequence of critical behavior. Probe III (<em>perceptibility</em>): even when the signal is there and local, it can sit at a lag longer than any window we keep — present in the world, absent from perception.</p>
+    <p>So the physics was the right physics. The Anthropocene really does have the shape of a transition in correlation structure. What these probes show is that <em>which representation you choose</em> decides what you are allowed to see — and the choice runs in four registers, one per probe. Levels or growth decided whether the <em>transition exists</em> (Probe I). Aggregate or fingerprint decided whether the <em>signal is visible</em> (Probe II). Same-time or time-lagged decided whether the <em>cause is perceptible at all</em> (Probe III). And absolute, per-capita, or cumulative decided who is <em>responsible</em> (Probe IV). The map is never the territory; here it is provably never the whole territory.</p>
+    <p><b>Probe IV is where the stakes turn.</b> The first three were about what we can see; this one is about whom we blame — and it does not hit an epistemic wall but crosses into a different kind of question entirely. The ranking bars do not disagree because the data is uncertain — every number there is real and exact. They disagree because they measure <em>different things that cannot share a ruler</em>: a flow of emissions this year, a flow per person, a stock accumulated over two centuries. No amount of better measurement collapses them into one true ranking of blame, because there is no measurement of which they are rival estimates. Pick absolute and China leads; pick per-capita and the wealthy lead; pick cumulative and the early industrializers lead. Each is correct. None is <em>the</em> answer.</p>
     <p class="tagline" style="margin-top:24px;">So the choice of ledger is not a measurement. It is a decision about what we owe.</p>
     <p>This is where physics hands off. A complete account of the correlation structure — which subsystems are coupled, which fingerprints are climbing, at what lag — is the precondition for any serious ethics of the Anthropocene; it is not the ethics. The science can tell you that the ledgers exist and what each one says. It cannot tell you which to open, because that question is not about what <em>is</em> but about what counts — and that is the first political question, not the last scientific one.</p>
     <p>And the lag axis is where the loss stops being a number at all. An extinction does not only destroy a present state H(now) — the count of what is alive today. It destroys H(the ensemble of futures) that state could still have become: every trajectory that bird's path-dependent form had kept open. That second quantity is incomparably larger, and it is not measured by anything on this page, because it is not the kind of thing a measurement returns. A slow harm whose cause has slid past our horizon, foreclosing futures we will never count — that is the Anthropocene's signature loss, and it is exactly the loss no order parameter records. Physics does not end in silence. It ends precisely where it should: at the edge of measurement, handing us a decision it was never able to make for us — about goods it was never able to see.</p>
@@ -487,9 +511,6 @@ function renderP1(){
   document.getElementById('curveMode').textContent=P.mode==='growth'?'year-to-year growth':'levels';
   document.getElementById('curveWin').textContent=`window ${y0}–${y1} highlighted`;
   drawCurves();drawHeat();drawLine();setCaption();
-  const rp=document.getElementById('rankPanel');
-  if(P.ds==='country'){rp.classList.remove('hidden');drawRanks();}
-  else rp.classList.add('hidden');
 }
 document.querySelectorAll('#dsSeg button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#dsSeg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');
@@ -508,6 +529,7 @@ document.querySelectorAll('#rankSeg button').forEach(b=>b.onclick=()=>{
 })();
 
 renderP1();
+drawRanks();   // Probe IV ranking panel is now independent of the Probe I matrix state
 window.addEventListener('resize',()=>{cache={};renderP1();});
 
 /* ---------- heatmap hover ---------- */
