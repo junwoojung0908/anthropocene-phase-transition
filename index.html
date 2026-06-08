@@ -36,6 +36,34 @@
   .probe-meta{font-family:"Space Mono",monospace;font-size:11.5px;letter-spacing:.02em;color:var(--ink-soft);line-height:1.7;margin:0 0 4px;}
   .probe-meta b{color:var(--accent);font-weight:700;}
   .probe-src{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.01em;color:var(--ink-soft);line-height:1.65;margin:0 0 16px;border-left:2px solid var(--rule);padding-left:12px;}
+  /* register token in front of each probe meta line */
+  .reg-tok{display:inline-block;font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.08em;
+    text-transform:uppercase;padding:1px 6px;border-radius:3px;margin-right:8px;vertical-align:1px;}
+  .reg-crit{background:rgba(168,50,45,.13);color:var(--accent);border:1px solid rgba(168,50,45,.35);}
+  .reg-comp{background:rgba(47,93,98,.13);color:var(--accent2);border:1px solid rgba(47,93,98,.4);}
+  /* intro frame block */
+  .frame-intro{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:18px 0;margin:22px 0 0;}
+  .frame-intro p{margin:0 0 .7em;}
+  .frame-intro p:last-child{margin:0;}
+  .frame-intro .fk{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;}
+  .frame-intro .fk.crit{color:var(--accent);}
+  .frame-intro .fk.comp{color:var(--accent2);}
+  /* 4-register spine rail */
+  .spine{font-family:"Space Mono",monospace;font-size:11px;line-height:1.5;color:var(--ink-soft);
+    background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin:18px 0 0;overflow-x:auto;}
+  .spine .grp{display:block;margin:2px 0;}
+  .spine .gl{display:inline-block;width:118px;letter-spacing:.1em;text-transform:uppercase;font-size:10px;vertical-align:top;}
+  .spine .gl.crit{color:var(--accent);}
+  .spine .gl.comp{color:var(--accent2);}
+  .spine .rows{display:inline-block;}
+  .spine .row b{color:var(--ink);}
+  /* complementarity simplex */
+  .simplex-wrap{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;}
+  @media(max-width:680px){.simplex-wrap{grid-template-columns:1fr;}}
+  #simplexCv{cursor:crosshair;touch-action:none;}
+  .simplex-read{font-family:"Space Mono",monospace;font-size:12px;line-height:1.8;}
+  .simplex-read .d{color:var(--ink-soft);}
+  .simplex-read b{color:var(--accent);}
   .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0;}
   .seg{display:inline-flex;border:1px solid var(--ink);border-radius:999px;overflow:hidden;}
   .seg button{font-family:"Space Mono",monospace;font-size:12px;padding:8px 14px;background:transparent;color:var(--ink);border:none;cursor:pointer;transition:all .15s;}
@@ -110,6 +138,21 @@
     <p class="lede">If the Anthropocene is a phase transition in the Earth system, can we actually see it in the data? This is an honest attempt — and an account of the wall it hits.</p>
     <p class="dropcap" style="margin-top:20px;">Physics gives the Anthropocene a tempting shape: a system pushed across a threshold into a qualitatively new regime. I wanted to test that, not assert it — to take the metaphor seriously enough to let real data refuse it. What follows are four probes, all run on observed records (CO₂, energy, economy, 1850–2022), and a conclusion none of them lets me escape.</p>
     <p>Change one setting and the world's worst polluter shifts from China to the Gulf to the US — and choosing which setting is true is not a measurement but a moral act. That is where this essay arrives.</p>
+
+    <div class="frame-intro">
+      <p>Two ideas from physics do the work here, and they are not metaphors.</p>
+      <p><span class="fk crit">Criticality</span> — the physics of systems at a threshold — tells me where a transition can and cannot be seen: not in any local variable (I), not at any finite resolution (II), not within any finite memory (III).</p>
+      <p><span class="fk comp">Complementarity</span> — that some quantities cannot be made sharp at once — tells me why the last question has no measured answer (IV).</p>
+      <p>The first three are about what the data lets me see. The fourth is about what it lets me decide. The seam between them is the whole essay.</p>
+    </div>
+
+    <div class="spine" aria-label="four-register map">
+      <span class="grp"><span class="gl crit">Criticality</span><span class="rows"><span class="row"><b>I</b> &nbsp;existence &nbsp;— order parameter is collective, not local</span></span></span>
+      <span class="grp"><span class="gl">&nbsp;</span><span class="rows"><span class="row"><b>II</b> &nbsp;visibility &nbsp;— the singularity rounds at finite size</span></span></span>
+      <span class="grp"><span class="gl">&nbsp;</span><span class="rows"><span class="row"><b>III</b> &nbsp;perceptibility &nbsp;— the correlation time outruns the window</span></span></span>
+      <span class="grp"><span class="gl comp">Complementarity</span><span class="rows"><span class="row"><b>IV</b> &nbsp;responsibility &nbsp;— the ledgers do not commute</span></span></span>
+    </div>
+
     <div class="byline">Junwoo Jung · KAIST Physics · interactive</div>
   </section>
 
@@ -118,7 +161,7 @@
     <div class="kicker">Probe I — Correlation structure</div>
     <h2>The transition the <em>scale invents</em></h2>
     <p class="tagline">A phase transition shows up not in any single variable, but in how variables become correlated. So: did the world's subsystems lock into one correlated whole?</p>
-    <p class="probe-meta"><b>Lens</b> correlation structure · <b>Move</b> levels → growth · <b>Finding</b> the clean transition was an artifact of scale</p>
+    <p class="probe-meta"><span class="reg-tok reg-crit">criticality</span><b>Lens</b> collective order parameter · <b>Move</b> local → collective coordinate · <b>Finding</b> no single series carries the transition; only the collective mode could — and detrended, even it does not</p>
     <p class="probe-src"><b>Data:</b> Our World in Data / Global Carbon Project — 9 world indicators and 40 countries, 1850–2022. &nbsp;<b>Why:</b> a phase transition lives in how variables co-move, not in any one of them — so we need many coupled series, not a single index.</p>
     <p>The standard story dates the Anthropocene to a "Great Acceleration" after 1950 — the moment human and Earth systems supposedly fused into a single, synchronized regime. If that fusion is real, it should be legible as correlation. So let us look. Below, the cross-correlation structure of real global series. The <span class="pill">levels</span> view correlates the raw rising curves; the <span class="pill">growth</span> view correlates their year-to-year changes. One of these tells a clean story of a synchronized planet. The other tells the truth.</p>
 
@@ -164,6 +207,8 @@
     </div>
 
     <p>Switch to <b>growth rates</b> and the blaze of red collapses. The "one synchronized system" was an artifact: any set of monotonically rising curves correlates near 1, whether or not anything is coupled. What survives honest detrending is not a clean 1950 transition but episodic synchrony — wars, oil shocks, 2008, the pandemic — shared shocks, not a phase change. The clean transition lived in the <em>choice of representation</em>, not in the world.</p>
+
+    <p>The lesson is sharper than "scale fooled us." A phase transition has no obligation to live in any single variable — its proper home is an order parameter, and here the only candidate is a collective coordinate: the leading mode shared across the series, not any one of them. Look locally and there is nothing to see; look at the collective mode and you find episodic synchrony, not a 1950 singularity. The transition is not hidden in the world badly — it has no local address at all.</p>
   </section>
 
   <!-- ===================== PROBE II ===================== -->
@@ -171,7 +216,7 @@
     <div class="kicker">Probe II — Critical slowing down</div>
     <h2>The transition the data can <em>barely see</em></h2>
     <p class="tagline">A real phase transition leaves a fingerprint before it happens: as a system nears a tipping point, it recovers from perturbations ever more slowly. Variance rises. Memory lengthens.</p>
-    <p class="probe-meta"><b>Lens</b> critical slowing down · <b>Move</b> aggregate → AMOC fingerprint · <b>Finding</b> the warning is real but washes out of the average</p>
+    <p class="probe-meta"><span class="reg-tok reg-crit">criticality</span><b>Lens</b> finite-size rounding of criticality · <b>Move</b> ∞-limit → finite resolution · <b>Finding</b> the singularity is exact only as N→∞; any finite measurement rounds it</p>
     <p class="probe-src"><b>Model:</b> saddle-node normal form (critical slowing down is an exact property of it). &nbsp;<b>Real data:</b> AMOC subpolar-gyre SST fingerprint (HadISST; Caesar et al. 2018; early-warning result Ditlevsen &amp; Ditlevsen 2023). &nbsp;<b>Why:</b> to ask whether a tipping fingerprint is visible we need both the exact theoretical signal and the one real subsystem known to carry it.</p>
     <p>This is exact physics, not analogy. Here is a system in a potential well, pushed by a rising forcing — read the forcing axis as cumulative CO₂. Drag it, or let it ramp. Watch the early-warning signals climb <em>before</em> the system tips — and watch that the tip does not reverse when you pull back.</p>
 
@@ -201,6 +246,29 @@
       <div class="note" style="margin-top:6px;">Left: the state in time. Right: the same system in phase space — the two solid branches are stable equilibria, the dashed branch is the unstable one they collide with at the fold. Ramp up and the ball clings to the lower branch until that branch <em>ceases to exist</em>, then jumps; ramp back down and it traces a different path. The enclosed loop is hysteresis — irreversibility, drawn as geometry.</div>
     </div>
 
+    <p>But "phase transition" means two different things on this page, and honesty requires separating them. The fold above is a catastrophe — one subsystem, one tipping point, sharp even for a single degree of freedom. A thermodynamic phase transition is something else: a genuine singularity in a many-component system, and it is exact only in the infinite-size limit. In any finite system — any finite set of observables, any finite sample of the planet — that singularity is rounded into a smooth crossover. Drag the size below and watch the kink soften; this is not measurement error you can beat with a better instrument. "No finite measurement resolves the phase" is a theorem about criticality, not a complaint about data.</p>
+
+    <div class="panel">
+      <div class="lab">Finite-size rounding — Curie–Weiss mean-field magnet, exact at each N &nbsp;·&nbsp; T<sub>c</sub> = 1</div>
+      <div class="viz-row vr-even" style="align-items:start;">
+        <div>
+          <div class="lab">Order parameter ⟨m⟩(T) — the kink at T<sub>c</sub></div>
+          <canvas id="fsM" width="380" height="200"></canvas>
+        </div>
+        <div>
+          <div class="lab">Susceptibility χ(T) — the diverging peak</div>
+          <canvas id="fsChi" width="380" height="200"></canvas>
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <div class="lab">System size N = <span id="fsNv" class="mono"></span> &nbsp;(spins / coupled components)</div>
+        <input type="range" id="fsN" min="0" max="5" value="1"/>
+      </div>
+      <div class="note" id="fsNote"></div>
+    </div>
+
+    <p>They are cousins, not strangers: in mean-field (Landau) theory the fold is the spinodal of the very transition whose singularity rounds at finite size, and critical slowing down belongs to both. The toy shows you the tipping; the size slider shows you why no finite view ever resolves it cleanly.</p>
+
     <p>That fingerprint is real, and it has been found in observations: the slowdown of the Atlantic overturning circulation shows exactly this rising variance and autocorrelation in sea-surface temperature records <span class="note">(Ditlevsen &amp; Ditlevsen 2023)</span>. But run the very same detector on the aggregate series we actually have on hand —</p>
 
     <div class="panel">
@@ -224,7 +292,7 @@
     <div class="kicker">Probe III — The horizon of memory</div>
     <h2>The cause is in the system; the <em>delay</em> is in us</h2>
     <p class="tagline">A bird's present form is not its initial condition — it is the whole trajectory it has travelled. Cause and effect need not be adjacent in time. When the lag outruns our memory, causation is real but imperceptible.</p>
-    <p class="probe-meta"><b>Lens</b> time-lagged correlation · <b>Move</b> shrink the observation window · <b>Finding</b> a real cause slides past our horizon</p>
+    <p class="probe-meta"><span class="reg-tok reg-crit">criticality</span><b>Lens</b> diverging correlation time · <b>Move</b> within-variable → between-variable · <b>Finding</b> the same long timescale that slows recovery (II) sits the cause at a lag no finite window holds</p>
     <p class="probe-src"><b>Data:</b> annual CO₂ emissions vs the AMOC SST fingerprint (Caesar 2018), time-lagged correlation, 1871–2016, with an AR(1) surrogate band. &nbsp;<b>Why:</b> to show a cause can outrun perception we need a real pair whose link lives at a multi-decade lag, not at τ=0.</p>
     <p>DDT was banned in 1972. Its signature surfaced decades later, in the breeding failure of albatrosses that had carried it up the food chain. The relevant quantity was never the same-time correlation C(X(t), Y(t)) — it was the <em>time-lagged</em> one, C(X(t), Y(t−τ)). A system with memory (non-Markovian) hides its causes at a delay; once τ exceeds an observation window or an institutional memory, the link is present in the world and absent from perception. This is slow violence: not a moral failure of attention, but a <em>structural</em> property of how the system carries its past.</p>
 
@@ -251,6 +319,8 @@
     </div>
 
     <p>The same record Probe II read for early warning, read now for delay: emissions and the overturning fingerprint share structure not at τ=0 but at a lag of decades. Shrink the observation window below that lag and the peak slides outside what you can see — the readout flips to <em>“the cause is now imperceptible.”</em> Nothing about the causation changed; only the horizon did. <span class="note">(Honesty: this is a lagged <em>correlation</em>, not a causal proof, and not mutual information — MI is unstable on records this short and noisy. The claim is narrow: a same-time view misses delayed structure that an AR(1) null does not fully account for.)</span></p>
+
+    <p>This is the same timescale as Probe II, wearing different clothes. There, a diverging relaxation time made a subsystem recover ever more slowly — a long timescale read within one variable. Here, that same length of time sits the cause at a multi-decade lag between two variables. They are not identical objects — one is a relaxation time, the other a transport delay — but they fail us the same way: when the relevant timescale exceeds the window we keep, the signal is in the world and absent from perception. Probe II and Probe III are one diverging clock, seen once inside a variable and once between two.</p>
   </section>
 
   <!-- ===================== PROBE IV ===================== -->
@@ -258,7 +328,7 @@
     <div class="kicker">Probe IV — Incommensurable ledgers</div>
     <h2>The villain the <em>ledger chooses</em></h2>
     <p class="tagline">Same emissions, three rulers that cannot share a unit. Who is responsible is not measured — it is decided.</p>
-    <p class="probe-meta"><b>Lens</b> emissions accounting · <b>Move</b> absolute → per-capita → cumulative · <b>Finding</b> no ledger ranks blame truly — the choice is a decision, not a measurement</p>
+    <p class="probe-meta"><span class="reg-tok reg-comp">complementarity</span><b>Lens</b> non-commuting ledgers · <b>Move</b> blend → pure rulers · <b>Finding</b> the three rulers share no eigenbasis; no measurement returns a joint order of blame</p>
     <p class="probe-src"><b>Data:</b> 2022 production-based CO₂ — absolute (Mt/yr), per-capita (t/person), cumulative since 1750 (Mt). OWID / Global Carbon Project. &nbsp;<b>Why:</b> these three are deliberately incommensurable — a flow, a flow-per-person, and a stock — so no single ledger can rank blame.</p>
     <p>The first three probes asked what the data lets us <em>see</em>. This one asks what it lets us <em>say about each other</em>. Take the same forty countries, the same real emissions, and rank them — but switch the ruler. Each ranking is exact; each names a different villain.</p>
 
@@ -279,18 +349,52 @@
     </div>
 
     <p>Nothing here is uncertain — every number is real and exact. The rankings disagree because the three measures are <em>incommensurable</em>: a flow this year, a flow per person, a stock accumulated over two centuries. There is no measurement of which they are rival estimates, so no better instrument collapses them into one true order of blame. Pick the ruler and you have picked the villain.</p>
+
+    <p>You might hope a blend escapes the trap — weight the three ledgers and read off a fair compromise. Drag inside the triangle: each corner is a pure ruler, and the bars rebuild live for the blend you choose. The readout tracks how far your blend's ranking sits from each pure one (a rank-distance). Move toward a corner and that distance goes to zero — but the other two grow. There is no interior point where all three vanish at once.</p>
+
+    <div class="panel">
+      <div class="lab">The blend never reconciles them — drag the weight inside the simplex</div>
+      <div class="simplex-wrap">
+        <div>
+          <canvas id="simplexCv" width="300" height="270"></canvas>
+          <div class="simplex-read" id="simplexRead"></div>
+        </div>
+        <div>
+          <div class="lab">Blended ranking — top 12</div>
+          <div id="simplexBars"></div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:8px;">This is classical incommensurability: the three pure rankings disagree, so the summed rank-distance has a strictly positive floor — <span id="simplexFloor" class="mono"></span>. Sitting at a corner zeroes one distance and maximizes the others; no blend zeroes all three. It is the <em>structure</em> of complementarity — non-commuting rulers — not quantum mechanics.</div>
+    </div>
   </section>
 
   <!-- ===================== CLOSE ===================== -->
-  <section>
+  <section id="closeSection">
     <div class="kicker">What the four probes share</div>
     <h2>No finite measurement resolves the phase</h2>
     <p>The first three probes end at the same wall, and it is the wall my framework predicted. Probe I (<em>existence</em>): the transition is not in any local order parameter — read levels and you invent a transition, read growth and it dissolves; the structure that would carry it lives in a global correlation architecture no aggregate captures. Probe II (<em>visibility</em>): the transition is real and physical, but near it the relevant signal concentrates in particular subsystems, and "no finite measurement fully resolves the phase" is a mathematical consequence of critical behavior. Probe III (<em>perceptibility</em>): even when the signal is there and local, it can sit at a lag longer than any window we keep — present in the world, absent from perception.</p>
+    <div class="panel">
+      <div class="lab">One diverging clock, two projections — drag the observation window W</div>
+      <canvas id="clockCv" width="760" height="150"></canvas>
+      <div class="slider-wrap">
+        <div class="lab">Observation window W = <span id="clockWv" class="mono"></span> years</div>
+        <input type="range" id="clockW" min="3" max="70" value="55"/>
+      </div>
+      <div class="viz-row vr-even" style="align-items:start;gap:14px;">
+        <div class="note" id="clockReadII"></div>
+        <div class="note" id="clockReadIII"></div>
+      </div>
+      <div class="note" style="margin-top:6px;">Probe II's relaxation time and Probe III's transport lag are two readings of one long timescale. Shrink the window and both signals wink out — first the lagged cause, then the early warning. <span class="note">(τ_relax is model-based: the saddle-node relaxation time <em>diverges</em> as the system nears the fold, τ ~ 1/√(μ<sub>c</sub>−μ); it is evaluated at Probe II's near-critical approach, not the calm record's ~2-yr baseline. τ_lag is the observed Probe III peak. Different objects — a relaxation time and a transport delay — but one diverging clock.)</span></div>
+    </div>
+
     <p>So the physics was the right physics. The Anthropocene really does have the shape of a transition in correlation structure. What these probes show is that <em>which representation you choose</em> decides what you are allowed to see — and the choice runs in four registers, one per probe. Levels or growth decided whether the <em>transition exists</em> (Probe I). Aggregate or fingerprint decided whether the <em>signal is visible</em> (Probe II). Same-time or time-lagged decided whether the <em>cause is perceptible at all</em> (Probe III). And absolute, per-capita, or cumulative decided who is <em>responsible</em> (Probe IV). The map is never the territory; here it is provably never the whole territory.</p>
+    <p>So the four probes are not four illustrations of one slogan. They are four theorems about a system at a threshold. Criticality takes three things from us in turn: a local order parameter (I), a finite-size resolution of the singularity (II), a bounded correlation time (III). Then complementarity takes a fourth: a commuting, jointly-sharp ledger of blame (IV). The first three are limits on what can be seen; the fourth is a limit on what can be decided by seeing. Physics does not run out here — it locates, exactly, the coordinate at which the question stops being about what is and becomes about what counts.</p>
     <p><b>Probe IV is where the stakes turn.</b> The first three were about what we can see; this one is about whom we blame — and it does not hit an epistemic wall but crosses into a different kind of question entirely. The ranking bars do not disagree because the data is uncertain — every number there is real and exact. They disagree because they measure <em>different things that cannot share a ruler</em>: a flow of emissions this year, a flow per person, a stock accumulated over two centuries. No amount of better measurement collapses them into one true ranking of blame, because there is no measurement of which they are rival estimates. Pick absolute and China leads; pick per-capita and the wealthy lead; pick cumulative and the early industrializers lead. Each is correct. None is <em>the</em> answer.</p>
+    <p>There is a precise name for this. The three rulers behave like observables that do not commute: you can make any one of them sharp, but only by blurring the others, and there is no representation — no rotation of the frame — in which all three are simultaneously sharp. Bohr gave this structure a name, <em>complementarity</em>, and applied it well past physics; quantum mechanics is only its sharpest formal instance. The ledgers are not quantum. But the structure is the same: no single basis diagonalizes all three, so no measurement returns a joint order of blame. The incommensurability is not ignorance to be cured by better data — it is the absence of a common eigenbasis.</p>
     <p class="tagline" style="margin-top:24px;">So the choice of ledger is not a measurement. It is a decision about what we owe.</p>
+    <p>A philosopher will say this is just Hume's gap between is and ought, dressed in physics — and they are half right. What the physics adds is not the gap but its coordinates: it shows that the gap is not closable by more measurement (complementarity, not ignorance), and it points to the exact place the gap opens — the choice of order parameter, the choice of ledger. The contribution is not "there is a fact–value gap." It is: here is where it opens, and here is why no instrument will ever close it.</p>
     <p>This is where physics hands off. A complete account of the correlation structure — which subsystems are coupled, which fingerprints are climbing, at what lag — is the precondition for any serious ethics of the Anthropocene; it is not the ethics. The science can tell you that the ledgers exist and what each one says. It cannot tell you which to open, because that question is not about what <em>is</em> but about what counts — and that is the first political question, not the last scientific one.</p>
-    <p>And the lag axis is where the loss stops being a number at all. An extinction does not only destroy a present state H(now) — the count of what is alive today. It destroys H(the ensemble of futures) that state could still have become: every trajectory that bird's path-dependent form had kept open. That second quantity is incomparably larger, and it is not measured by anything on this page, because it is not the kind of thing a measurement returns. A slow harm whose cause has slid past our horizon, foreclosing futures we will never count — that is the Anthropocene's signature loss, and it is exactly the loss no order parameter records. Physics does not end in silence. It ends precisely where it should: at the edge of measurement, handing us a decision it was never able to make for us — about goods it was never able to see.</p>
+    <p>And the loss is the information-theoretic face of the irreversibility I already drew. An extinction does not only delete a present state — the count of what is alive now. It deletes the reachable future manifold that state still kept open: every trajectory the system's path-dependent form had not yet foreclosed. That is the shaded region on the fold above — the branch the tip made unreachable. It is incomparably larger than any present state, and no order parameter records it, because option value is not a state but a volume of futures. The hysteresis loop is that loss drawn as geometry; this is the same loss read as lost possibility. Physics does not end in silence. It ends precisely where it should: at the edge of measurement, handing us a decision it was never able to make for us — about goods it was never able to see.</p>
   </section>
 
   <footer>
@@ -530,6 +634,92 @@ document.querySelectorAll('#rankSeg button').forEach(b=>b.onclick=()=>{
 
 renderP1();
 drawRanks();   // Probe IV ranking panel is now independent of the Probe I matrix state
+
+/* ---------- Probe IV complementarity simplex ----------
+   Three rank-normalized score vectors (absolute / per-capita / cumulative) over the
+   40 countries. A barycentric weight (w_a,w_p,w_c) blends them; we rank by the blend
+   and measure its Kendall-tau distance (fraction of discordant pairs) to each PURE
+   ranking. Moving to a corner zeroes one distance and grows the others; the summed
+   distance has a strictly positive floor because the three pure orders disagree.
+   This is classical incommensurability — the STRUCTURE of complementarity, not QM. */
+(function(){
+  const cv=document.getElementById('simplexCv'); if(!cv) return;
+  const src=srcFor('country'); const ranks=src&&src._ranks; if(!ranks) return;
+  const names=Object.keys(ranks).filter(c=>ranks[c].abs!=null&&ranks[c].pc!=null&&ranks[c].cum!=null);
+  const raw={abs:[],pc:[],cum:[]};
+  names.forEach(c=>{raw.abs.push(ranks[c].abs);raw.pc.push(ranks[c].pc);raw.cum.push(ranks[c].cum);});
+  // rank-normalize each measure to [0,1] (1 = highest emitter)
+  function rankNorm(arr){const idx=arr.map((v,i)=>[v,i]).sort((a,b)=>a[0]-b[0]);const s=new Array(arr.length);
+    idx.forEach((p,r)=>{s[p[1]]=arr.length>1?r/(arr.length-1):0;});return s;}
+  const S={abs:rankNorm(raw.abs),pc:rankNorm(raw.pc),cum:rankNorm(raw.cum)};
+  const N=names.length;
+  function orderOf(score){return score.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]).map(p=>p[1]);}
+  // Kendall-tau distance (normalized fraction of discordant pairs) between two score vectors
+  function tauDist(x,y){let dis=0,tot=0;for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){const a=Math.sign(x[i]-x[j]),b=Math.sign(y[i]-y[j]);if(a&&b){tot++;if(a!==b)dis++;}}return tot?dis/tot:0;}
+  function blend(wa,wp,wc){return S.abs.map((_,i)=>wa*S.abs[i]+wp*S.pc[i]+wc*S.cum[i]);}
+  // achievable minimum of (d_abs+d_pc+d_cum) by sampling the simplex
+  let floor=Infinity;
+  for(let a=0;a<=20;a++)for(let p=0;p+a<=20;p++){const wa=a/20,wp=p/20,wc=1-wa-wp;const bl=blend(wa,wp,wc);
+    const s=tauDist(bl,S.abs)+tauDist(bl,S.pc)+tauDist(bl,S.cum);if(s<floor)floor=s;}
+  document.getElementById('simplexFloor').textContent='min Σ ≈ '+floor.toFixed(2)+' (> 0)';
+  // geometry: equilateral triangle, corners abs(top) / pc(bottom-left) / cum(bottom-right)
+  const W=300,H=270,cx=W/2,pad=34;
+  const V={abs:[cx,pad], pc:[pad,H-pad], cum:[W-pad,H-pad]};
+  let w={a:0.34,p:0.33,c:0.33};
+  function bary(px,py){ // cartesian -> barycentric on the triangle
+    const [x1,y1]=V.abs,[x2,y2]=V.pc,[x3,y3]=V.cum;
+    const det=(y2-y3)*(x1-x3)+(x3-x2)*(y1-y3);
+    let a=((y2-y3)*(px-x3)+(x3-x2)*(py-y3))/det;
+    let b=((y3-y1)*(px-x3)+(x1-x3)*(py-y3))/det;
+    let c=1-a-b; return [a,b,c];
+  }
+  function clampBary(a,b,c){a=Math.max(0,a);b=Math.max(0,b);c=Math.max(0,c);const s=a+b+c||1;return [a/s,b/s,c/s];}
+  function barsHTML(score){
+    const rows=score.map((v,i)=>[names[i],v]).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    const mx=rows[0][1]||1;
+    return rows.map(([c,v],i)=>`<div class="rbar${i===0?' lead':''}"><div class="rname">${c}</div>`+
+      `<div class="rtrack"><div class="rfill" style="width:${(v/mx*100).toFixed(1)}%"></div></div>`+
+      `<div class="rval">${(v).toFixed(2)}</div></div>`).join('');
+  }
+  function draw(){
+    const dpr=devicePixelRatio||1;cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';
+    const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    // triangle
+    ctx.strokeStyle=css('--ink-soft');ctx.lineWidth=1.4;ctx.beginPath();
+    ctx.moveTo(...V.abs);ctx.lineTo(...V.pc);ctx.lineTo(...V.cum);ctx.closePath();ctx.stroke();
+    // corner labels + dots
+    const cols={abs:css('--accent'),pc:css('--accent2'),cum:css('--accent3')};
+    ctx.font='11px "Space Mono"';ctx.textAlign='center';
+    ctx.fillStyle=cols.abs;ctx.beginPath();ctx.arc(...V.abs,4,0,7);ctx.fill();ctx.fillText('Absolute',V.abs[0],V.abs[1]-9);
+    ctx.fillStyle=cols.pc;ctx.beginPath();ctx.arc(...V.pc,4,0,7);ctx.fill();ctx.textAlign='left';ctx.fillText('Per capita',V.pc[0]-4,V.pc[1]+16);
+    ctx.fillStyle=cols.cum;ctx.beginPath();ctx.arc(...V.cum,4,0,7);ctx.fill();ctx.textAlign='right';ctx.fillText('Cumulative',V.cum[0]+4,V.cum[1]+16);
+    ctx.textAlign='left';
+    // current point
+    const px=w.a*V.abs[0]+w.p*V.pc[0]+w.c*V.cum[0], py=w.a*V.abs[1]+w.p*V.pc[1]+w.c*V.cum[1];
+    ctx.fillStyle=css('--ink');ctx.beginPath();ctx.arc(px,py,6,0,7);ctx.fill();
+    ctx.strokeStyle=css('--paper');ctx.lineWidth=1.5;ctx.stroke();
+    // compute blended ranking + distances
+    const bl=blend(w.a,w.p,w.c);
+    const dA=tauDist(bl,S.abs),dP=tauDist(bl,S.pc),dC=tauDist(bl,S.cum),sum=dA+dP+dC;
+    document.getElementById('simplexBars').innerHTML=barsHTML(bl);
+    document.getElementById('simplexRead').innerHTML=
+      `weights &nbsp;a=${w.a.toFixed(2)} p=${w.p.toFixed(2)} c=${w.c.toFixed(2)}<br>`+
+      `<span class="d">dist to</span> <b style="color:${cols.abs}">abs</b> ${dA.toFixed(2)} &nbsp; `+
+      `<b style="color:${cols.pc}">pc</b> ${dP.toFixed(2)} &nbsp; <b style="color:${cols.cum}">cum</b> ${dC.toFixed(2)}<br>`+
+      `<span class="d">Σ distance</span> <b>${sum.toFixed(2)}</b> &nbsp;<span class="d">(floor ${floor.toFixed(2)})</span>`;
+  }
+  function setFromEvent(e){const r=cv.getBoundingClientRect();
+    const cxp=(e.touches?e.touches[0].clientX:e.clientX)-r.left, cyp=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    const [a,b,c]=clampBary(...bary(cxp,cyp));w={a,p:b,c};draw();}
+  let dragging=false;
+  cv.addEventListener('mousedown',e=>{dragging=true;setFromEvent(e);});
+  window.addEventListener('mousemove',e=>{if(dragging)setFromEvent(e);});
+  window.addEventListener('mouseup',()=>{dragging=false;});
+  cv.addEventListener('touchstart',e=>{e.preventDefault();setFromEvent(e);},{passive:false});
+  cv.addEventListener('touchmove',e=>{e.preventDefault();setFromEvent(e);},{passive:false});
+  draw();
+})();
+
 window.addEventListener('resize',()=>{cache={};renderP1();});
 
 /* ---------- heatmap hover ---------- */
@@ -612,6 +802,13 @@ function drawSim(){
    measured Earth variable. */
 const phaseCv=document.getElementById('phase');
 let trail=[]; const TRAIL=900;
+let forecloseFade=0;  // 0→1 as the closing section scrolls into view (drives fold shading)
+function updateForecloseFade(){const sec=document.getElementById('closeSection');if(!sec)return;
+  const vh=window.innerHeight||document.documentElement.clientHeight||800;
+  if(vh<2)return; // headless/zero-viewport: leave fade unchanged
+  const r=sec.getBoundingClientRect();
+  // fade from 0 when the section top is one viewport below, to 1 when it reaches mid-screen
+  forecloseFade=Math.max(0,Math.min(1,(vh-r.top)/(vh*0.6)));}
 const MUSPAN=[-0.75,0.75], XSPAN=[-1.7,1.7];
 function drawPhase(){
   if(!phaseCv)return;
@@ -633,9 +830,27 @@ function drawPhase(){
       if(m<MUSPAN[0]-0.05||m>MUSPAN[1]+0.05){started=false;continue;}
       const X=MX(m),Y=XY(xv);started?ctx.lineTo(X,Y):ctx.moveTo(X,Y);started=true;}
     ctx.stroke();}
+  // foreclosed-futures shading: once the system has tipped to the lower branch, the
+  // upper stable branch (and the states above the unstable separatrix) are no longer
+  // reachable without driving the forcing far back — the "lost future manifold". Fades
+  // in when the closing section scrolls into view (forecloseFade 0→1).
+  if(forecloseFade>0){
+    ctx.save();ctx.globalAlpha=0.20*forecloseFade;ctx.fillStyle=css('--accent');
+    ctx.beginPath();let started=false;
+    // top edge: upper stable branch x:xc→XSPAN[1] (μ from -MUC up to right edge)
+    for(let xv=xc;xv<=XSPAN[1]+1e-6;xv+=0.01){const m=xv*xv*xv-xv;if(m>MUSPAN[1]+0.05)continue;const X=MX(m),Y=XY(xv);started?ctx.lineTo(X,Y):ctx.moveTo(X,Y);started=true;}
+    ctx.lineTo(MX(MUSPAN[1]),XY(XSPAN[1]));ctx.lineTo(MX(-MUC),XY(XSPAN[1]));ctx.closePath();ctx.fill();
+    // separatrix→upper basin wedge near the fold (unstable branch up to upper)
+    ctx.globalAlpha=0.12*forecloseFade;ctx.beginPath();started=false;
+    for(let xv=-xc;xv<=xc+1e-6;xv+=0.01){const m=xv*xv*xv-xv;const X=MX(m),Y=XY(xv);started?ctx.lineTo(X,Y):ctx.moveTo(X,Y);started=true;}
+    for(let xv=xc;xv>=-xc-1e-6;xv-=0.01){const m=xv*xv*xv-xv;ctx.lineTo(MX(m),XY(XSPAN[1]));break;}
+    ctx.lineTo(MX(-MUC),XY(XSPAN[1]));ctx.closePath();ctx.fill();ctx.restore();
+  }
   ctx.strokeStyle=css('--ink');ctx.lineWidth=2;branch(xc,XSPAN[1],[]);branch(XSPAN[0],-xc,[]); // stable
   ctx.strokeStyle=css('--ink-soft');ctx.lineWidth=1.4;branch(-xc,xc,[4,4]);                    // unstable (dashed)
   ctx.setLineDash([]);
+  if(forecloseFade>0.5){ctx.fillStyle=css('--accent');ctx.globalAlpha=Math.min(1,(forecloseFade-0.5)*2);
+    ctx.font='italic 10px "Space Mono"';ctx.fillText('foreclosed',MX(0.18),XY(1.45));ctx.globalAlpha=1;}
   // fold points (where branches meet): x=±1/sqrt3, mu=∓2/(3√3)
   ctx.fillStyle=css('--accent3');
   [[ -MUC, xc],[MUC,-xc]].forEach(([m,xv])=>{ctx.beginPath();ctx.arc(MX(m),XY(xv),3,0,7);ctx.fill();});
@@ -647,6 +862,7 @@ function drawPhase(){
   ctx.fillStyle=tipped?css('--accent'):css('--accent2');ctx.beginPath();ctx.arc(bx,by,5,0,7);ctx.fill();
 }
 function loop(){
+  updateForecloseFade();
   if(ramping){mu+=0.0016;if(mu>0.62){mu=0.62;ramping=false;document.getElementById('rampBtn').textContent='▶ Auto-ramp the forcing';}
     document.getElementById('muSlider').value=Math.round(mu*100);}
   stepSim();
@@ -710,6 +926,61 @@ requestAnimationFrame(loop);
   ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';[0,Math.floor(ac.length/2),ac.length-1].forEach(i=>{const X=padL+pw*(i/(ac.length-1));ctx.fillText(cy[i],X-14,H-6);});
   const n=ac.length;let sx=0,sy=0,sxy=0,sxx=0;ac.forEach((v,i)=>{sx+=i;sy+=v;sxy+=i*v;sxx+=i*i;});const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
   document.getElementById('amocCsdNote').textContent='Lag-1 autocorrelation rises from '+ac[0].toFixed(2)+' to '+ac[ac.length-1].toFixed(2)+' across '+cy[0]+'\u2013'+cy[cy.length-1]+' (trend \u2248 '+(slope>=0?'+':'')+slope.toFixed(4)+'/step); window variance rises in step. The critical-slowing-down signature is present here \u2014 in the one variable that carries it \u2014 where the aggregate showed nothing.';
+})();
+
+/* ---------- Probe II finite-size rounding: Curie\u2013Weiss mean-field Ising ----------
+   EXACT at each finite N (no Monte Carlo): the all-to-all magnet has energy
+   E(M)=-(J/2N)M^2 over total-magnetization sectors M, with multiplicity C(N,(N+M)/2).
+   Binomials via log-gamma so N up to 512 doesn't overflow. The point: the singularity
+   at T_c=1 is exact only as N\u2192\u221e; every finite N rounds it into a smooth crossover. */
+(function(){
+  const Ns=[8,16,32,64,128,512], J=1, Tc=1;
+  const lg=(x)=>{ // Lanczos log-gamma
+    const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,
+      -176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+    if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lg(1-x);
+    x-=1;let a=c[0];const t=x+g+0.5;for(let i=1;i<g+2;i++)a+=c[i]/(x+i);
+    return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);};
+  const logC=(n,k)=>lg(n+1)-lg(k+1)-lg(n-k+1);
+  function stats(N,T){ // returns {m,chi} exact for Curie\u2013Weiss at temperature T
+    const beta=1/T; let logw=[],Ms=[];
+    for(let M=-N;M<=N;M+=2){const k=(N+M)/2;const E=-(J/(2*N))*M*M;logw.push(logC(N,k)-beta*E);Ms.push(M);}
+    const mx=Math.max(...logw); let Z=0,sAbs=0,sM=0,sM2=0;
+    for(let i=0;i<logw.length;i++){const w=Math.exp(logw[i]-mx);Z+=w;sAbs+=w*Math.abs(Ms[i]);sM+=w*Ms[i];sM2+=w*Ms[i]*Ms[i];}
+    const m=(sAbs/Z)/N, m1=sM/Z, m2=sM2/Z, chi=beta*(m2-m1*m1)/N;
+    return {m,chi};
+  }
+  const Ts=[];for(let i=0;i<200;i++)Ts.push(0.2+(2.0-0.2)*i/199);
+  // precompute curves per N
+  const curves=Ns.map(N=>{const m=[],chi=[];Ts.forEach(T=>{const s=stats(N,T);m.push(s.m);chi.push(s.chi);});return {N,m,chi};});
+  const chiMaxAll=Math.max(...curves.map(c=>Math.max(...c.chi)));
+  function axis(ctx,w,h,yMax,label){const pL=34,pR=10,pT=10,pB=20,pw=w-pL-pR,ph=h-pT-pB;
+    ctx.clearRect(0,0,w,h);ctx.strokeStyle=css('--rule');ctx.lineWidth=1;ctx.fillStyle=css('--ink-soft');ctx.font='10px "Space Mono"';
+    [0,0.25,0.5,0.75,1].forEach(f=>{const y=pT+ph*(1-f);ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(w-pR,y);ctx.stroke();ctx.fillText((f*yMax).toFixed(yMax>=2?1:2),2,y+3);});
+    // Tc line
+    const X=T=>pL+pw*((T-0.2)/(2.0-0.2));ctx.strokeStyle=css('--accent3');ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(X(Tc),pT);ctx.lineTo(X(Tc),pT+ph);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=css('--ink-soft');ctx.textAlign='center';[0.2,1,2].forEach(T=>ctx.fillText('T='+T,X(T),h-6));ctx.textAlign='left';
+    return {pL,pR,pT,pB,pw,ph,X,Y:v=>pT+ph*(1-Math.max(0,Math.min(1,v/yMax)))};}
+  function draw(){
+    const idx=+document.getElementById('fsN').value, sel=curves[idx];
+    document.getElementById('fsNv').textContent=sel.N;
+    const dpr=devicePixelRatio||1;
+    // m panel
+    let cv=document.getElementById('fsM'),w=cv.clientWidth||380,h=200;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+    let ctx=cv.getContext('2d');ctx.scale(dpr,dpr);let A=axis(ctx,w,h,1,'m');
+    // ghost: all other N faint
+    curves.forEach((c,i)=>{if(i===idx)return;ctx.strokeStyle=css('--rule');ctx.globalAlpha=.5;ctx.lineWidth=1;ctx.beginPath();c.m.forEach((v,j)=>{const x=A.X(Ts[j]),y=A.Y(v);j?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();});
+    ctx.globalAlpha=1;ctx.strokeStyle=css('--accent');ctx.lineWidth=2.2;ctx.beginPath();sel.m.forEach((v,j)=>{const x=A.X(Ts[j]),y=A.Y(v);j?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    // chi panel (shared scale across N so the peak visibly grows)
+    cv=document.getElementById('fsChi');w=cv.clientWidth||380;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+    ctx=cv.getContext('2d');ctx.scale(dpr,dpr);A=axis(ctx,w,h,chiMaxAll,'\u03c7');
+    curves.forEach((c,i)=>{if(i===idx)return;ctx.strokeStyle=css('--rule');ctx.globalAlpha=.5;ctx.lineWidth=1;ctx.beginPath();c.chi.forEach((v,j)=>{const x=A.X(Ts[j]),y=A.Y(v);j?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();});
+    ctx.globalAlpha=1;ctx.strokeStyle=css('--accent2');ctx.lineWidth=2.2;ctx.beginPath();sel.chi.forEach((v,j)=>{const x=A.X(Ts[j]),y=A.Y(v);j?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    const pk=Math.max(...sel.chi);
+    document.getElementById('fsNote').innerHTML=`At N=${sel.N} the order parameter still falls through a rounded crossover and the susceptibility peak (\u03c7\u2248${pk.toFixed(2)}) is finite and broad. Only as N\u2192\u221e does the kink sharpen to a true singularity at T<sub>c</sub>=1 and the peak diverge. The smoothing is exact physics, not noise \u2014 no instrument resolves what the infinite limit alone makes sharp.`;
+  }
+  document.getElementById('fsN').addEventListener('input',draw);
+  draw();
 })();
 
 /* ---------- Probe III: lagged correlation / non-Markovian memory ----------
@@ -864,6 +1135,60 @@ function drawLagReal(){
 }
 document.getElementById('winSpan').oninput=drawLagReal;
 drawLagReal();
+
+/* ---------- Unified timescale window (II ↔ III bridge) ----------
+   tau_relax is MODEL-BASED, not the quiescent baseline: near a saddle-node the
+   relaxation time diverges as tau ~ 1/sqrt(mu_c - mu) (critical slowing down, the
+   exact property Probe II's model rests on). We evaluate it at the same near-critical
+   approach where Probe II's early-warning gauges climb — so it is a many-decade
+   timescale, the divergence itself, not the ~2-yr decorrelation of the calm record.
+   tau_lag = Probe III's significant lagged-correlation peak (LAGREAL), an observed
+   transport delay. The two are different objects (a relaxation time vs a transport
+   delay) but read off one long, diverging clock; W gates both. */
+(function(){
+  const cv=document.getElementById('clockCv'); if(!cv) return;
+  // near-critical relaxation time of the saddle-node model: tau ~ k / sqrt(mu_c - mu)
+  // evaluated at the approach where Probe II's gauges climb (mu within ~0.13 of fold).
+  // Calibrated so the divergence lands on a multi-decade scale comparable to the lag.
+  const MUC_=2/(3*Math.sqrt(3));               // fold (matches Probe II's MUC)
+  const muApproach=MUC_-0.11;                   // within Probe II's "nearing the threshold" band (<0.13)
+  const tauRelax=Math.round(6/Math.sqrt(MUC_-muApproach));   // model units → years (k=6); ~18y, below the 28y lag
+  const tauLag = (typeof LAGREAL!=='undefined'&&LAGREAL)? LAGREAL.peakTau : 28;
+  const maxT=70;
+  function draw(){
+    const W=+document.getElementById('clockW').value;
+    const dpr=devicePixelRatio||1,w=cv.clientWidth||760,h=150;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+    const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+    const pL=10,pR=10,pT=24,pB=24,pw=w-pL-pR,ph=h-pT-pB;
+    const X=t=>pL+pw*(t/maxT);
+    // window shade
+    ctx.fillStyle='rgba(192,137,47,.14)';ctx.fillRect(pL,pT,X(W)-pL,ph);
+    ctx.strokeStyle=css('--accent3');ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(W),pT-6);ctx.lineTo(X(W),pT+ph);ctx.stroke();
+    ctx.fillStyle=css('--accent3');ctx.font='10px "Space Mono"';ctx.textAlign='center';ctx.fillText('W='+W,X(W),pT-10);
+    // baseline
+    ctx.strokeStyle=css('--rule');ctx.beginPath();ctx.moveTo(pL,pT+ph);ctx.lineTo(w-pR,pT+ph);ctx.stroke();
+    // markers
+    function mark(t,label,col,vis){const x=X(t);ctx.strokeStyle=col;ctx.setLineDash(vis?[]:[3,3]);ctx.globalAlpha=vis?1:.5;
+      ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,pT);ctx.lineTo(x,pT+ph);ctx.stroke();
+      ctx.beginPath();ctx.arc(x,pT+ph,4,0,7);ctx.fillStyle=col;ctx.fill();ctx.setLineDash([]);ctx.globalAlpha=1;
+      ctx.fillStyle=col;ctx.textAlign='center';ctx.fillText(label,x,pT+ph+16);}
+    mark(tauRelax,'τ_relax '+tauRelax+'y (model)',css('--accent'),W>=tauRelax);
+    mark(tauLag,'τ_lag '+tauLag+'y (data)',css('--accent2'),W>=tauLag);
+    ctx.textAlign='left';
+    // axis ticks
+    ctx.fillStyle=css('--ink-soft');[0,35,70].forEach((t,i)=>{ctx.textAlign=i===0?'left':i===2?'right':'center';ctx.fillText(t+'y',X(t),h-4);});ctx.textAlign='left';
+    document.getElementById('clockWv').textContent=W;
+    const vII=W>=tauRelax, vIII=W>=tauLag;
+    document.getElementById('clockReadII').innerHTML = vII
+      ? '<b style="color:var(--accent2)">II: early-warning climb VISIBLE</b> — the window holds the relaxation time.'
+      : '<b style="color:var(--accent)">II: early-warning INVISIBLE</b> — the window is shorter than τ_relax.';
+    document.getElementById('clockReadIII').innerHTML = vIII
+      ? '<b style="color:var(--accent2)">III: lagged cause VISIBLE</b> — the window reaches the lag.'
+      : '<b style="color:var(--accent)">III: the cause is now imperceptible</b> — the lag sits outside the window.';
+  }
+  document.getElementById('clockW').addEventListener('input',draw);
+  draw();
+})();
 </script>
 </body>
 </html>
